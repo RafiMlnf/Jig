@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>PE-Machining: Jig &amp; Fixture Management</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Font Setup -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0"
+        rel="stylesheet">
+    <!-- Tailwind Configuration matching Precision Core Design System -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Geist', 'sans-serif'],
+                    },
+                    colors: {
+                        'surface': '#111316',
+                        'surface-dim': '#111316',
+                        'surface-bright': '#37393d',
+                        'surface-container-lowest': '#0c0e11',
+                        'surface-container-low': '#1a1c1f',
+                        'surface-container': '#1e2023',
+                        'surface-container-high': '#282a2e',
+                        'surface-container-highest': '#333539',
+                        'on-surface': '#e2e2e5',
+                        'on-surface-variant': '#c4c6d0',
+                        'outline': '#8e9099',
+                        'outline-variant': '#44474e',
+                        'primary': '#00e5ff',
+                        'on-primary': '#00363d',
+                        'primary-container': '#004f58',
+                        'on-primary-container': '#89f3ff',
+                        'secondary': '#b1cbd0',
+                        'on-secondary': '#1c3438',
+                        'secondary-container': '#334b4f',
+                        'on-secondary-container': '#cde7ec',
+                        // Custom accents from reference image
+                        'accent-yellow': '#fdf287',
+                        'accent-orange': '#ffb088',
+                        'accent-purple': '#cc99ff',
+                        'accent-blue': '#8ee0f6',
+                        'accent-green': '#a8f3aa',
+                        'accent-pink': '#ffaec6',
+                    },
+                    borderRadius: {
+                        'none': '0',
+                        'sm': '0.125rem',
+                        'DEFAULT': '0.25rem',
+                        'md': '0.375rem',
+                        'lg': '0.5rem',
+                        'xl': '0.75rem',
+                        '2xl': '1rem',
+                        '3xl': '1.5rem',
+                        'full': '9999px',
+                    },
+                }
+            }
+        }
+    </script>
+    <style data-purpose="custom-utilities">
+        /* Hide scrollbar for clean look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Pattern background for cards */
+        .bg-pattern-dots {
+            background-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+            background-size: 8px 8px;
+        }
+
+        .bg-pattern-lines {
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0, 0, 0, 0.05) 2px, rgba(0, 0, 0, 0.05) 4px);
+        }
+
+        .bg-pattern-waves {
+            background-image: repeating-radial-gradient(circle at 0 0, transparent 0, transparent 10px, rgba(0, 0, 0, 0.05) 10px, rgba(0, 0, 0, 0.05) 20px);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-[#e4e5f1] text-on-surface font-sans h-screen w-screen overflow-hidden flex items-center justify-center p-4">
+    <!-- BEGIN: Main App Container (16:9 Aspect Ratio) -->
+    <div
+        class="w-full h-full max-w-[1920px] max-h-[1080px] aspect-video bg-surface rounded-2xl shadow-2xl flex overflow-hidden border-2 border-black relative">
+        <!-- BEGIN: Left Navigation Panel (Dark Mode, Narrower) -->
+        <aside class="w-56 bg-surface-container-low border-r border-outline-variant flex flex-col h-full z-10 shrink-0">
+            <!-- Header -->
+            <div class="p-4 border-b border-outline-variant">
+                <h1 class="text-sm font-bold text-on-surface flex items-center gap-1.5 leading-tight">
+                    <span class="material-symbols-outlined text-primary text-base">precision_manufacturing</span>
+                    PE-Machining:<br>Jig &amp; Fixture Mgt.
+                </h1>
+                <p class="text-[10px] text-on-surface-variant mt-1">Section Head View</p>
+            </div>
+            <!-- Navigation Links -->
+            <nav class="flex-1 overflow-y-auto py-2">
+                <ul class="space-y-0.5">
+                    <!-- Active Tab -->
+                    <li class="">
+                        <a class="flex items-center gap-2 py-2 px-3 mx-2 rounded-lg bg-secondary-container text-on-secondary-container transition-all"
+                            href="#">
+                            <span class="material-symbols-outlined text-base">dashboard</span>
+                            <span class="font-medium text-xs">Dashboard</span>
+                        </a>
+                    </li>
+                    <!-- Inactive Tabs -->
+                    <li class="">
+                        <a class="flex items-center gap-2 py-2 px-3 mx-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all group"
+                            href="#">
+                            <span
+                                class="material-symbols-outlined text-base group-hover:scale-110 transition-transform">table_view</span>
+                            <span class="font-medium text-xs">View Data</span>
+                        </a>
+                    </li>
+                    <li class="">
+                        <a class="flex items-center gap-2 py-2 px-3 mx-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all group"
+                            href="#">
+                            <span
+                                class="material-symbols-outlined text-base group-hover:scale-110 transition-transform">design_services</span>
+                            <span class="font-medium text-xs">Update Design</span>
+                        </a>
+                    </li>
+                    <li class="">
+                        <a class="flex items-center gap-2 py-2 px-3 mx-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all group"
+                            href="#">
+                            <span
+                                class="material-symbols-outlined text-base group-hover:scale-110 transition-transform">report_problem</span>
+                            <span class="font-medium text-xs">Update Abnormality</span>
+                        </a>
+                    </li>
+                    <li class="">
+                        <a class="flex items-center gap-2 py-2 px-3 mx-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all group"
+                            href="#">
+                            <span
+                                class="material-symbols-outlined text-base group-hover:scale-110 transition-transform">inventory_2</span>
+                            <span class="font-medium text-xs">Update Inventory (F1)</span>
+                        </a>
+                    </li>
+                    <li class="">
+                        <a class="flex items-center gap-2 py-2 px-3 mx-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all group"
+                            href="#">
+                            <span
+                                class="material-symbols-outlined text-base group-hover:scale-110 transition-transform">fact_check</span>
+                            <span class="font-medium text-xs flex-1">Approval Center (F2)</span>
+                            <span class="bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">3</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <!-- Footer Actions -->
+            <div class="p-3 border-t border-outline-variant">
+                <button
+                    class="w-full py-1.5 px-3 rounded-lg bg-primary text-on-primary font-bold text-xs hover:bg-opacity-90 transition-colors flex items-center justify-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">add</span>
+                    Submit Revision
+                </button>
+            </div>
+        </aside>
+        <!-- END: Left Navigation Panel -->
+        <!-- BEGIN: Main Content Area -->
+        <main
+            class="flex-1 flex flex-col h-full bg-[#f8f9fa] overflow-hidden text-surface rounded-l-2xl z-20 shadow-[-10px_0_20px_rgba(0,0,0,0.2)]">
+            <!-- Top Section: Header & Inventory Status -->
+            <div class="flex flex-col border-b border-gray-200 p-4 bg-white h-[55%]">
+                <!-- Header Controls (Horizontal) -->
+                <header class="flex justify-between items-center mb-3">
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-lg font-semibold flex items-center gap-1 cursor-pointer hover:opacity-80">
+                            Inventory Status Overview <span
+                                class="material-symbols-outlined text-gray-400 text-sm">expand_more</span>
+                        </h2>
+                        <div class="relative">
+                            <span
+                                class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs">search</span>
+                            <input
+                                class="pl-7 pr-3 py-1 bg-gray-100 border-none rounded-full text-xs w-48 focus:ring-1 focus:ring-primary outline-none text-gray-700 placeholder-gray-500"
+                                placeholder="Search No.Reg, Part Name..." type="text">
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="flex items-center gap-1 text-[10px] text-gray-500 font-medium border border-gray-200 rounded-full px-2 py-1 cursor-pointer hover:bg-gray-50">
+                            Line: Auto Assy Steering Stem <span
+                                class="material-symbols-outlined text-[14px]">expand_more</span>
+                        </div>
+                        <button
+                            class="bg-[#3b82f6] text-white px-3 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1 hover:bg-blue-600 transition-colors">
+                            <span class="material-symbols-outlined text-[14px]">download</span> Export
+                        </button>
+                    </div>
+                </header>
+                <!-- Inventory Status Content -->
+                <div class="flex-1 flex flex-col gap-3 min-h-0">
+                    <!-- Summary Cards (Compact Row) -->
+                    <div class="flex gap-3 h-16">
+                        <div
+                            class="flex-1 bg-surface rounded-xl px-3 py-2 flex items-center gap-3 shadow-sm border border-outline-variant/30">
+                            <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-green-500 text-lg">check_circle</span>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-on-surface-variant leading-none mb-1">Aman (Green)</p>
+                                <h3 class="text-lg font-bold text-on-surface leading-none">52 <span
+                                        class="text-[10px] font-normal text-on-surface-variant">Items</span></h3>
+                            </div>
+                        </div>
+                        <div
+                            class="flex-1 bg-surface rounded-xl px-3 py-2 flex items-center gap-3 shadow-sm border border-outline-variant/30">
+                            <div
+                                class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-yellow-500 text-lg">warning</span>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-on-surface-variant leading-none mb-1">Warning (Yellow)</p>
+                                <h3 class="text-lg font-bold text-on-surface leading-none">14 <span
+                                        class="text-[10px] font-normal text-on-surface-variant">Items</span></h3>
+                            </div>
+                        </div>
+                        <div
+                            class="flex-1 bg-surface rounded-xl px-3 py-2 flex items-center gap-3 shadow-sm border border-outline-variant/30 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-red-500/10 animate-pulse"></div>
+                            <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center z-10 shrink-0">
+                                <span class="material-symbols-outlined text-white text-lg">error</span>
+                            </div>
+                            <div class="z-10">
+                                <p class="text-[10px] text-on-surface-variant leading-none mb-1">Critical/Stok 0</p>
+                                <h3 class="text-lg font-bold text-on-surface leading-none">3 <span
+                                        class="text-[10px] font-normal text-on-surface-variant">Items</span></h3>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Table Area (Optimized) -->
+                    <div class="flex-1 overflow-y-auto no-scrollbar bg-white rounded-lg border border-gray-200">
+                        <table class="w-full text-left border-collapse text-[11px]">
+                            <thead>
+                                <tr
+                                    class="bg-gray-50 text-gray-500 font-semibold sticky top-0 z-10 border-b border-gray-200">
+                                    <th class="px-3 py-1">No. Reg</th>
+                                    <th class="px-2 py-1">Part Name</th>
+                                    <th class="px-2 py-1">Process</th>
+                                    <th class="px-2 text-center py-1">Rev Status</th>
+                                    <th class="px-2 text-right py-1">Min Stock</th>
+                                    <th class="px-2 text-right py-1">Actual</th>
+                                    <th class="px-2 text-center py-1">Status</th>
+                                    <th class="px-2 text-center py-1">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-700">
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                    <td class="px-3 font-medium font-mono py-1">TXMACH-ASAU010000</td>
+                                    <td class="px-2 flex items-center gap-1.5 py-1">
+                                        <div
+                                            class="w-5 h-5 bg-gray-200 rounded flex items-center justify-center shrink-0">
+                                            <span
+                                                class="material-symbols-outlined text-gray-400 text-[12px]">view_in_ar</span>
+                                        </div>
+                                        Full Assy
+                                    </td>
+                                    <td class="px-2 text-gray-500 py-1">OP#1 (PressFit)</td>
+                                    <td class="px-2 text-center py-1"><span
+                                            class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-[9px] font-bold">1</span>
+                                    </td>
+                                    <td class="px-2 text-right py-1">2</td>
+                                    <td class="px-2 text-right font-bold py-1">3</td>
+                                    <td class="px-2 text-center py-1"><span
+                                            class="inline-block w-2 h-2 rounded-full bg-green-500"></span></td>
+                                    <td class="px-2 text-center py-1"><button
+                                            class="text-primary hover:text-blue-600"><span
+                                                class="material-symbols-outlined text-sm">edit</span></button></td>
+                                </tr>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                    <td class="px-3 font-medium font-mono py-1">TXMACH-ASAU010101</td>
+                                    <td class="px-2 flex items-center gap-1.5 py-1">
+                                        <div
+                                            class="w-5 h-5 bg-gray-200 rounded flex items-center justify-center shrink-0">
+                                            <span
+                                                class="material-symbols-outlined text-gray-400 text-[12px]">view_in_ar</span>
+                                        </div>
+                                        Sub Assy 1
+                                    </td>
+                                    <td class="px-2 text-gray-500 py-1">OP#1 (PressFit)</td>
+                                    <td class="px-2 text-center py-1"><span
+                                            class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-[9px] font-bold">0</span>
+                                    </td>
+                                    <td class="px-2 text-right py-1">5</td>
+                                    <td class="px-2 text-right font-bold text-yellow-600 py-1">3</td>
+                                    <td class="px-2 text-center py-1"><span
+                                            class="inline-block w-2 h-2 rounded-full bg-yellow-400"></span></td>
+                                    <td class="px-2 text-center py-1"><button
+                                            class="text-primary hover:text-blue-600"><span
+                                                class="material-symbols-outlined text-sm">edit</span></button></td>
+                                </tr>
+                                <tr class="border-b border-red-100 bg-red-50 hover:bg-red-100 transition-colors">
+                                    <td class="px-3 font-medium font-mono text-red-700 py-1">TXMACH-ASAU010102</td>
+                                    <td class="px-2 flex items-center gap-1.5 py-1">
+                                        <div
+                                            class="w-5 h-5 bg-gray-200 rounded flex items-center justify-center shrink-0">
+                                            <span
+                                                class="material-symbols-outlined text-gray-400 text-[12px]">view_in_ar</span>
+                                        </div>
+                                        Pin Locator
+                                    </td>
+                                    <td class="px-2 text-gray-500 py-1">OP#2 (Welding)</td>
+                                    <td class="px-2 text-center py-1"><span
+                                            class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-[9px] font-bold">2</span>
+                                    </td>
+                                    <td class="px-2 text-right text-red-700 py-1">10</td>
+                                    <td class="px-2 text-right font-bold text-red-600 py-1">0</td>
+                                    <td class="px-2 text-center py-1"><span
+                                            class="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                                    </td>
+                                    <td class="px-2 text-center py-1"><button
+                                            class="text-primary hover:text-blue-600"><span
+                                                class="material-symbols-outlined text-sm">edit</span></button></td>
+                                </tr>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                    <td class="px-3 font-medium font-mono py-1">TXMACH-ASAU010103</td>
+                                    <td class="px-2 flex items-center gap-1.5 py-1">
+                                        <div
+                                            class="w-5 h-5 bg-gray-200 rounded flex items-center justify-center shrink-0">
+                                            <span
+                                                class="material-symbols-outlined text-gray-400 text-[12px]">view_in_ar</span>
+                                        </div>
+                                        Base Plate
+                                    </td>
+                                    <td class="px-2 text-gray-500 py-1">OP#1 (PressFit)</td>
+                                    <td class="px-2 text-center py-1"><span
+                                            class="bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded text-[9px] font-bold">N/A</span>
+                                    </td>
+                                    <td class="px-2 text-right py-1">1</td>
+                                    <td class="px-2 text-right font-bold py-1">1</td>
+                                    <td class="px-2 text-center py-1"><span
+                                            class="inline-block w-2 h-2 rounded-full bg-green-500"></span></td>
+                                    <td class="px-2 text-center py-1"><button
+                                            class="text-primary hover:text-blue-600"><span
+                                                class="material-symbols-outlined text-sm">edit</span></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- END Top Section -->
+            <!-- Bottom Section: Analytics (Dark Mode, 3 Columns) -->
+            <div class="bg-surface flex p-4 gap-4 relative h-[45%]">
+                <!-- Task Statistics (Gauge) -->
+                <div
+                    class="w-1/3 bg-surface-container-low rounded-xl p-4 flex flex-col relative border border-outline-variant/30">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-sm text-on-surface">Inventory Health</h3>
+                        <span
+                            class="text-[10px] text-on-surface-variant flex items-center gap-0.5 cursor-pointer hover:text-primary">Auto
+                            Assy <span class="material-symbols-outlined text-[12px]">expand_more</span></span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center justify-center relative min-h-0">
+                        <!-- Compact Semi-circle gauge -->
+                        <div class="w-32 h-16 relative overflow-hidden flex justify-center items-end pb-1 mt-2">
+                            <div
+                                class="absolute w-32 h-32 rounded-full border-[8px] border-surface-bright border-b-transparent border-r-transparent transform -rotate-45">
+                            </div>
+                            <div class="absolute w-32 h-32 rounded-full border-[8px] border-primary border-b-transparent border-r-transparent transform -rotate-45"
+                                style="clip-path: polygon(0 0, 75% 0, 75% 100%, 0 100%);"></div>
+                            <div class="absolute w-32 h-32 rounded-full border-[8px] border-red-500/50 border-b-transparent border-r-transparent transform rotate-45"
+                                style="clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);"></div>
+                            <div
+                                class="flex flex-col items-center z-10 bg-surface-container-low px-2 py-0.5 rounded-full absolute bottom-0 translate-y-1/2">
+                                <span class="text-[10px] font-bold text-on-surface flex items-center gap-0.5"><span
+                                        class="material-symbols-outlined text-[10px] text-primary">thumb_up</span>
+                                    Optimal State</span>
+                                <span class="text-[8px] text-on-surface-variant">69 Items</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between w-full mt-4 px-2">
+                            <div>
+                                <div class="text-xl font-bold text-on-surface leading-none">75<span
+                                        class="text-xs text-on-surface-variant">%</span></div>
+                                <div class="text-[9px] text-on-surface-variant">Green Indicator</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-on-surface leading-none">25<span
+                                        class="text-xs text-on-surface-variant">%</span></div>
+                                <div class="text-[9px] text-on-surface-variant">Yellow/Red</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Task Type (Bubble Chart) -->
+                <div
+                    class="w-1/3 bg-surface-container-low rounded-xl p-4 flex flex-col border border-outline-variant/30">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-sm text-on-surface">Line Distribution</h3>
+                        <span
+                            class="text-[10px] text-on-surface-variant flex items-center gap-0.5 cursor-pointer hover:text-primary">All
+                            Lines <span class="material-symbols-outlined text-[12px]">expand_more</span></span>
+                    </div>
+                    <div class="flex-1 relative flex items-center justify-center min-h-0">
+                        <!-- Bubbles (Scaled Down) -->
+                        <div class="relative w-full h-full max-w-[140px] max-h-[140px]">
+                            <!-- Main Bubble -->
+                            <div
+                                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-accent-blue rounded-full flex flex-col items-center justify-center text-surface shadow-md z-10 cursor-pointer hover:scale-105 transition-transform">
+                                <span class="text-xl font-bold">69</span>
+                            </div>
+                            <!-- Small Left -->
+                            <div
+                                class="absolute top-2/3 left-2 w-10 h-10 bg-[#a3a388] rounded-full flex flex-col items-center justify-center text-on-surface shadow-sm cursor-pointer hover:scale-105 transition-transform">
+                                <span class="text-xs font-bold">12</span>
+                            </div>
+                            <!-- Small Right -->
+                            <div
+                                class="absolute top-1/4 right-2 w-12 h-12 bg-[#8c9a59] rounded-full flex flex-col items-center justify-center text-on-surface shadow-sm cursor-pointer hover:scale-105 transition-transform">
+                                <span class="text-sm font-bold">8</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Legend (Compact) -->
+                    <div class="flex justify-between mt-2 px-1">
+                        <div class="text-center">
+                            <div class="text-sm font-bold text-on-surface">69</div>
+                            <div class="text-[8px] text-on-surface-variant truncate w-12">Auto Assy</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm font-bold text-on-surface">12</div>
+                            <div class="text-[8px] text-on-surface-variant truncate w-12">UB Robot</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm font-bold text-on-surface">8</div>
+                            <div class="text-[8px] text-on-surface-variant truncate w-12">D38-Hub</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Your Activity (Bar Chart) -->
+                <div
+                    class="w-1/3 bg-surface-container-low rounded-xl p-4 flex flex-col border border-outline-variant/30">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h3 class="font-bold text-sm text-on-surface">Approval Activity</h3>
+                            <p class="text-[9px] text-on-surface-variant">Nov 2025</p>
+                        </div>
+                        <span
+                            class="text-[10px] text-on-surface-variant flex items-center gap-0.5 cursor-pointer hover:text-primary">1M
+                            <span class="material-symbols-outlined text-[12px]">expand_more</span></span>
+                    </div>
+                    <div class="flex-1 flex items-end justify-between px-2 pb-4 relative mt-2 min-h-0">
+                        <!-- Bar Groups -->
+                        <div class="flex gap-0.5 h-16 items-end">
+                            <div
+                                class="w-2 bg-surface-bright rounded-t-sm h-[40%] hover:bg-gray-400 cursor-pointer transition-colors">
+                            </div>
+                            <div
+                                class="w-2 bg-surface-bright rounded-t-sm h-[80%] hover:bg-gray-400 cursor-pointer transition-colors">
+                            </div>
+                        </div>
+                        <div class="flex gap-0.5 h-16 items-end">
+                            <div
+                                class="w-2 bg-surface-bright rounded-t-sm h-[60%] hover:bg-gray-400 cursor-pointer transition-colors">
+                            </div>
+                            <div
+                                class="w-2 bg-surface-bright rounded-t-sm h-[30%] hover:bg-gray-400 cursor-pointer transition-colors">
+                            </div>
+                        </div>
+                        <!-- Highlighted Group -->
+                        <div class="flex gap-0.5 h-16 items-end relative group">
+                            <div
+                                class="w-2 bg-primary rounded-t-sm h-[90%] shadow-[0_0_8px_rgba(0,229,255,0.4)] cursor-pointer">
+                            </div>
+                            <div
+                                class="w-2 bg-surface-bright rounded-t-sm h-[50%] cursor-pointer group-hover:bg-gray-400 transition-colors">
+                            </div>
+                            <!-- Chart Tooltip -->
+                            <div
+                                class="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-surface px-2 py-1 rounded-md text-[8px] font-bold shadow-md whitespace-nowrap z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div class="flex items-center gap-1">
+                                    <div class="w-1 h-1 bg-primary rounded-full"></div> Approvals
+                                </div>
+                                <div class="text-green-600 text-right">+15%</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-0.5 h-16 items-end">
+                            <div
+                                class="w-2 bg-surface-bright rounded-t-sm h-[70%] hover:bg-gray-400 cursor-pointer transition-colors">
+                            </div>
+                            <div
+                                class="w-2 bg-surface-bright rounded-t-sm h-[20%] hover:bg-gray-400 cursor-pointer transition-colors">
+                            </div>
+                        </div>
+                        <!-- X-Axis Labels -->
+                        <div
+                            class="absolute bottom-0 left-0 right-0 flex justify-between px-1 text-[8px] text-on-surface-variant">
+                            <span class="">W1</span>
+                            <span class="">W2</span>
+                            <span class="">W3</span>
+                            <span class="">W4</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END Bottom Section -->
+        </main>
+        <!-- END: Main Content Area -->
+        <!-- BEGIN: Right Status Panel (Yellow Accent, Narrower) -->
+        <aside
+            class="w-[280px] bg-accent-yellow p-3 flex flex-col gap-3 border-l-2 border-black shrink-0 relative overflow-y-auto no-scrollbar shadow-[-5px_0_15px_rgba(0,0,0,0.1)]">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center gap-1">
+                    <span class="text-xs font-bold text-gray-800">Pending Approvals</span>
+                </div>
+                <div
+                    class="flex items-center gap-1 text-[10px] font-semibold text-gray-700 bg-white/50 px-2 py-1 rounded-full cursor-pointer hover:bg-white transition-colors">
+                    <span class="material-symbols-outlined text-[12px]">wb_sunny</span> 05 Nov <span
+                        class="material-symbols-outlined text-[12px]">expand_more</span>
+                </div>
+            </div>
+            <!-- Filter Pills -->
+            <div class="flex gap-1.5 mb-1 overflow-x-auto no-scrollbar">
+                <span
+                    class="px-2 py-0.5 bg-gray-900 text-white text-[9px] font-bold rounded-full whitespace-nowrap cursor-pointer">All</span>
+                <span
+                    class="px-2 py-0.5 bg-white/50 text-gray-700 text-[9px] font-bold rounded-full whitespace-nowrap cursor-pointer hover:bg-white transition-colors border border-gray-300">Design
+                    Rev</span>
+                <span
+                    class="px-2 py-0.5 bg-[#d8b4fe] text-gray-900 text-[9px] font-bold rounded-full whitespace-nowrap cursor-pointer hover:brightness-95 transition-all">Inventory</span>
+            </div>
+            <!-- Team Header -->
+            <div class="flex justify-between items-end mb-2">
+                <div>
+                    <p class="text-[10px] text-gray-600 font-medium mb-0.5 flex items-center gap-1">Role: <span
+                            class="bg-gray-900 text-white px-1.5 py-0.5 rounded flex items-center gap-1 text-[9px]"><span
+                                class="material-symbols-outlined text-[10px] text-primary">badge</span> Section
+                            Head</span></p>
+                    <h2 class="text-lg font-bold text-gray-900 leading-tight">Waiting Review (3)</h2>
+                </div>
+            </div>
+            <!-- Status Cards List -->
+            <div class="flex flex-col gap-2.5">
+                <!-- Card: Red/Coral -->
+                <div
+                    class="bg-accent-orange rounded-2xl p-3 shadow-sm border border-orange-200/50 hover:shadow-md transition-shadow relative overflow-hidden group cursor-pointer">
+                    <div
+                        class="absolute top-3 right-3 w-6 h-6 rounded-full border border-gray-900 flex items-center justify-center group-hover:bg-gray-900 group-hover:text-white transition-colors">
+                        <span class="material-symbols-outlined text-xs transform -rotate-45">arrow_forward</span>
+                    </div>
+                    <p class="text-[9px] text-gray-800 font-medium flex items-center gap-1 mb-0.5"><span
+                            class="material-symbols-outlined text-[10px]">schedule</span> 05 Nov 2025, 09:15</p>
+                    <h3 class="text-sm font-bold text-gray-900 mb-0.5">TXMACH-ASAU010101</h3>
+                    <p class="text-[9px] text-gray-800 leading-tight mb-2 font-medium truncate">Sub Assy 1 (Auto Assy
+                        Steering Stem)</p>
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] font-medium text-gray-800">By:</span>
+                            <div class="flex items-center gap-1 bg-white/50 px-1.5 py-0.5 rounded-full">
+                                <img class="w-3 h-3 rounded-full border border-gray-400"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0K5uMa_eyzsLMfQnbYnlDlbL0hBNbMgB43eKGSSrulPd8R9KaBD-eOVIRnjge_lre88wQy32ZMQbO5pKvKoJdf7atqBmlbiSVEQIAF1Wf7obS1uwccX8H_uNfR8SZ6-SE-1fv1hDVDh_g8Jp0I7dS5FLdPtJ_RtVTHs-mnlA6p4X_ZzB-516cPH-NL6fxEyDNf7v4FLZ2X5nqNvfLo15Em1bnYhl46iz08ZtBfbLW2c17XuJTiElB">
+                                <span class="text-[8px] font-bold">Azka A.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white/40 p-1.5 rounded-md mb-2">
+                        <p class="text-[8px] text-gray-800 font-medium italic line-clamp-2">"Revisi desain Sub Assy 1 —
+                            perubahan diameter pin locator agar toleransi lebih pas."</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="bg-gray-900 text-white text-[8px] px-1.5 py-0.5 rounded-sm">Design Rev</span>
+                        <span class="ml-auto text-[9px] font-bold text-yellow-600 flex items-center gap-0.5"><span
+                                class="material-symbols-outlined text-[10px]">hourglass_empty</span> Waiting</span>
+                    </div>
+                </div>
+                <!-- Card: Purple -->
+                <div
+                    class="bg-[#d8b4fe] rounded-2xl p-3 shadow-sm border border-purple-300/50 hover:shadow-md transition-shadow relative overflow-hidden group cursor-pointer">
+                    <!-- Background Pattern -->
+                    <div class="absolute inset-0 opacity-30 bg-pattern-dots mix-blend-overlay"></div>
+                    <div class="relative z-10">
+                        <div
+                            class="absolute top-0 right-0 w-6 h-6 rounded-full border border-gray-900 flex items-center justify-center group-hover:bg-gray-900 group-hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-xs transform -rotate-45">arrow_forward</span>
+                        </div>
+                        <p class="text-[9px] text-gray-800 font-medium flex items-center gap-1 mb-0.5">
+                            <span class="flex items-center gap-0.5"><span
+                                    class="material-symbols-outlined text-[10px]">schedule</span> 04 Nov 2025,
+                                14:30</span>
+                        </p>
+                        <h3 class="text-sm font-bold text-gray-900 mb-0.5">TXMACH-ASAU010000</h3>
+                        <p class="text-[9px] text-gray-800 leading-tight mb-2 font-medium truncate">Full Assy (Auto Assy
+                            Steering Stem)</p>
+                        <div
+                            class="bg-gray-900 rounded-lg p-1.5 flex justify-center items-center mb-2 cursor-pointer hover:bg-gray-800 transition-colors">
+                            <div class="flex items-center gap-1 text-white text-[9px] font-medium">
+                                <span class="material-symbols-outlined text-[12px]">view_in_ar</span> View 3D Render
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[9px] font-medium text-gray-800">By:</span>
+                                <div class="flex items-center gap-1 bg-white/50 px-1.5 py-0.5 rounded-full">
+                                    <img class="w-3 h-3 rounded-full border border-gray-400"
+                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqSWynFIF5IXa5dPqdQYgI1xToToObttdbI9tRtzPJGOmN8HFNjCbE-4tvBIpYgnJ7P4-uCjVtt4VlvkoRXHaNxbYl8lyVDzLHWV1-ZctdrCuRy3O_dJacUOkjHlf4blEyKLiX-eLJu0rwtFBQ1BsW9wnOFYH2bAsGTQ0YW4-_W3lPWOUNAjM1ZUjvbROvLQKnCifXl1AySuedl4hKSzZ8Un6-j1y_o5iMrn3jPn1QjdHo2gG4Ibp4">
+                                    <span class="text-[8px] font-bold">Rahmat K.</span>
+                                </div>
+                            </div>
+                            <span class="bg-gray-900 text-white text-[8px] px-1.5 py-0.5 rounded-sm">Inventory
+                                Update</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Floating Right Action Bar -->
+            <div
+                class="absolute right-0 top-3 bottom-3 w-10 bg-[#fdf287] border-l border-yellow-200 flex flex-col items-center py-3 rounded-l-xl z-20 shadow-[-2px_0_10px_rgba(0,0,0,0.05)]">
+                <div class="relative group cursor-pointer mb-6">
+                    <img alt="Profile" class="w-7 h-7 rounded-full border-2 border-gray-900"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtMOYff7OgesliTnGxspcplPIEwSeOf40HCwZVmNAfgdCD9s7IQZ8flV6kuI-dzU5vsxP9ZiJ2g-sp44ehAS4wsfxxbkmPXYCiuTwKOA0gw8UKr6hlCg0gWa1e4acnT6TK4K0iKqjLS_HSVy1AIzTr2PRajgElIcusDLqqWdUhU2Ccu5k6sDqn0mHibbROIX6bqe90TmTPBo4cBbOFfxYer6DpMvRDEwdgzcelncr76VQT60WAOufz">
+                    <div
+                        class="absolute -bottom-1 -right-1 w-3 h-3 bg-white rounded-full border border-gray-900 flex items-center justify-center font-bold text-gray-900 text-[8px] hover:bg-gray-900 hover:text-white transition-colors">
+                        +</div>
+                </div>
+                <div class="flex-1 flex flex-col gap-4 items-center w-full">
+                    <button class="text-gray-900 hover:text-primary transition-colors relative">
+                        <span class="material-symbols-outlined text-[18px]">notifications</span>
+                        <span
+                            class="absolute top-0 right-0 w-1.5 h-1.5 bg-red-500 rounded-full border border-yellow-100"></span>
+                    </button>
+                    <div
+                        class="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center text-white cursor-pointer shadow-md hover:scale-105 transition-transform relative">
+                        <span class="material-symbols-outlined text-[16px]">fact_check</span>
+                        <div class="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-yellow-400 rounded-full"></div>
+                    </div>
+                    <button class="text-gray-900 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">folder_open</span>
+                    </button>
+                    <button class="text-gray-900 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">settings</span>
+                    </button>
+                </div>
+                <!-- Floating Action Menu Indicator -->
+                <div class="mt-auto bg-gray-900 rounded-full w-6 py-2 flex flex-col items-center gap-1.5 text-white">
+                    <span
+                        class="material-symbols-outlined text-[14px] cursor-pointer hover:text-primary">check_circle</span>
+                    <span class="material-symbols-outlined text-[14px] cursor-pointer hover:text-red-500">cancel</span>
+                    <div
+                        class="w-3 h-3 rounded-full border-2 border-white flex items-center justify-center cursor-pointer mt-0.5">
+                        <div class="w-1 h-1 bg-white rounded-full"></div>
+                    </div>
+                </div>
+                <button class="mt-3 text-gray-900 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">logout</span>
+                </button>
+            </div>
+        </aside>
+        <!-- END: Right Status Panel -->
+    </div>
+    <!-- END: Main App Container -->
+
+
+</body>
+
+</html>

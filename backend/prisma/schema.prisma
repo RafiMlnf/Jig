@@ -1,12 +1,280 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+// ==========================================
+// MASTER DATA
+// ==========================================
+
+model Role {
+  id        String   @id @default(cuid())
+  name      String   @unique // e.g. "PE_JIG_FIXTURE", "PE_SECTION_HEAD", "PE_DEPT_HEAD", "TAMU"
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  users     User[]
+
+  @@map("role")
+}
+
+model User {
+  id                    String         @id @default(cuid())
+  name                  String
+  npk                   String         @unique
+  email                 String         @unique
+  password              String         // hashed password
+  roleId                String         @map("role_id")
+  role                  Role           @relation(fields: [roleId], references: [id])
+  createdAt             DateTime       @default(now()) @map("created_at")
+  updatedAt             DateTime       @updatedAt @map("updated_at")
+
+  inventoryLogs         InventoryLog[]
+  notifications         Notification[]
+  submittedApprovals    Approval[]     @relation("SubmittedBy")
+  sectionApprovals      Approval[]     @relation("SectionHead")
+  deptApprovals         Approval[]     @relation("DeptHead")
+  reportedAbnormalities Abnormality[]  @relation("ReportedAbnormalities")
+  revisionHistories     RevisionHistory[]
+
+  @@map("user")
+}
+
+model Line {
+  id        String   @id @default(cuid())
+  lineName  String   @map("line_name")
+  lineCode  String   @map("line_code")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  designs   Design[]
+
+  @@map("line")
+}
+
+model Process {
+  id        String   @id @default(cuid())
+  name      String
+  code      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  designs   Design[]
+
+  @@map("process")
+}
+
+model Vendor {
+  id        String   @id @default(cuid())
+  name      String
+  code      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  designs           Design[]
+  revisionHistories RevisionHistory[]
+
+  @@map("vendor")
+}
+
+// ==========================================
+// TRANSACTIONAL DATA
+// ==========================================
+
+model Design {
+  id                String         @id @default(cuid())
+  noReg             String         @unique @map("no_reg")
+  type              DesignType     @default(JF)
+  noItem            String         @map("no_item")
+  qty               String
+  revStatus         String?        @map("rev_status") // "0", "1", "2", "N/A"
+  
+  lineId            String         @map("line_id")
+  line              Line           @relation(fields: [lineId], references: [id])
+  processId         String         @map("process_id")
+  process           Process        @relation(fields: [processId], references: [id])
+  vendorId          String?        @map("vendor_id")
+  vendor            Vendor?        @relation(fields: [vendorId], references: [id])
+
+  inventoryStatus   String         @default("GREEN") @map("inventory_status") // RED / YELLOW / GREEN
+  abnormalityStatus String         @default("RESOLVED") @map("abnormality_status") // OPEN / IN_PROGRESS / RESOLVED
+  lifecycleStatus   LifecycleStatus @default(ACTIVE) @map("lifecycle_status")
+
+  // Extra fields to keep inventory and 3D features functional
+  assyPartName      String         @map("assy_part_name")
+  minimumStock      Int            @default(0) @map("minimum_stock")
+  actualStock       Int            @default(0) @map("actual_stock")
+  designDateLast    DateTime?      @map("design_date_last")
+  designDateNew     DateTime?      @map("design_date_new")
+  newVisualDesign   String?        @map("new_visual_design")
+
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  documents         Document[]
+  approvals         Approval[]
+  abnormalities     Abnormality[]
+  inventoryLogs     InventoryLog[]
+  notifications     Notification[]
+  revisionHistories RevisionHistory[]
+
+  @@map("design")
+}
+
+enum DesignType {
+  JF
+  EQ
+}
+
+model Document {
+  id             String         @id @default(cuid())
+  designId       String         @map("design_id")
+  design         Design         @relation(fields: [designId], references: [id])
+  path2D         String?        @map("2d_path")
+  loc2D          String?        @map("2d_loc")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  approvalStatus String         @default("APPROVED") @map("approval_status")
+
+  @@map("document")
+}
+
+model RevisionHistory {
+  id             String   @id @default(cuid())
+  designId       String   @map("design_id")
+  design         Design   @relation(fields: [designId], references: [id])
+  revStatus      String   @map("rev_status")
+  description    String
+  changedById    String   @map("changed_by_id")
+  changedBy      User     @relation(fields: [changedById], references: [id])
+  
+  vendorId       String?  @map("vendor_id")
+  vendor         Vendor?  @relation(fields: [vendorId], references: [id])
+  poNumber       String?  @map("po_number")
+  cost           Float?   @default(0)
+  leadTime       Int?     @map("lead_time")
+  approvedByName String?  @map("approved_by_name")
+  path3D         String?  @map("3d_path")
+  loc3D          String?  @map("3d_loc")
+
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("revision_history")
+}
+
+model Abnormality {
+  id               String            @id @default(cuid())
+  designId         String            @map("design_id")
+  design           Design            @relation(fields: [designId], references: [id])
+  reportedById     String            @map("reported_by_id")
+  reportedBy       User              @relation("ReportedAbnormalities", fields: [reportedById], references: [id])
+  type             String            // RUSAK / AUS / DEFORMASI / LAINNYA
+  description      String
+  status           AbnormalityStatus @default(OPEN)
+  
+  dateFound        DateTime          @default(now()) @map("date_found")
+  foundBy          String            @map("found_by")
+  rootCause        String            @map("root_cause")
+  tempAction       String            @map("temp_action")
+  correctiveAction String            @map("corrective_action")
+  actionPic        String            @map("action_pic")
+  linkToRevision   Boolean           @default(false) @map("link_to_revision")
+  linkToSpare      Boolean           @default(false) @map("link_to_spare")
+
+  resolvedAt       DateTime?         @map("resolved_at")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  @@map("abnormality")
+}
+
+enum AbnormalityStatus {
+  OPEN
+  MONITORING
+  CLOSED
+}
+
+model InventoryLog {
+  id            String         @id @default(cuid())
+  designId      String         @map("design_id")
+  design        Design         @relation(fields: [designId], references: [id])
+  changedById   String         @map("changed_by_id")
+  changedBy     User           @relation(fields: [changedById], references: [id])
+  prevMinStock  Int            @map("prev_min_stock")
+  newMinStock   Int            @map("new_min_stock")
+  prevActStock  Int            @map("prev_act_stock")
+  newActStock   Int            @map("new_act_stock")
+  indicator     String         // RED / YELLOW / GREEN
+  createdAt     DateTime       @default(now()) @map("created_at")
+
+  @@map("inventory_log")
+}
+
+model Notification {
+  id        String          @id @default(cuid())
+  type      String          // INVENTORY_RED / INVENTORY_YELLOW / WAITING_APPROVAL / ABNORMALITY_OPEN
+  title     String
+  message   String
+  isRead    Boolean         @default(false) @map("is_read")
+  designId  String?         @map("design_id")
+  design    Design?         @relation(fields: [designId], references: [id])
+  userId    String          @map("user_id")
+  user      User            @relation(fields: [userId], references: [id])
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  @@map("notification")
+}
+
+model Approval {
+  id             String         @id @default(cuid())
+  type           ApprovalType
+  status         ApprovalStatus @default(WAITING)
+  designId       String         @map("design_id")
+  design         Design         @relation(fields: [designId], references: [id])
+  revisionNote   String?        @map("revision_note")
+
+  submittedById  String         @map("submitted_by_id")
+  submittedBy    User           @relation("SubmittedBy", fields: [submittedById], references: [id])
+  submittedAt    DateTime       @default(now()) @map("submitted_at")
+
+  sectionHeadId  String?        @map("section_head_id")
+  sectionHead    User?          @relation("SectionHead", fields: [sectionHeadId], references: [id])
+  sectionStatus  ApprovalStatus @default(WAITING) @map("section_status")
+  sectionComment String?        @map("section_comment")
+  sectionAt      DateTime?      @map("section_at")
+
+  deptHeadId     String?        @map("dept_head_id")
+  deptHead       User?          @relation("DeptHead", fields: [deptHeadId], references: [id])
+  deptStatus     ApprovalStatus @default(WAITING) @map("dept_status")
+  deptComment    String?        @map("dept_comment")
+  deptAt         DateTime?      @map("dept_at")
+
+  finalStatus    ApprovalStatus @default(WAITING) @map("final_status")
+  finalComment   String?        @map("final_comment")
+
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  @@map("approval")
+}
+
+enum ApprovalType {
+  DESIGN_REVISION
+  INVENTORY_UPDATE
+}
+
+enum ApprovalStatus {
+  WAITING
+  APPROVED
+  REJECTED
+}
+
+enum LifecycleStatus {
+  ACTIVE
+  UNDER_REPAIR
+  UNDER_IMPROVEMENT
+  OBSOLETE
+  SCRAP
 }

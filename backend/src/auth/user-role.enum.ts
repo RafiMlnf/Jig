@@ -1,0 +1,6 @@
+export enum UserRole {
+  PE_JIG_FIXTURE = 'PE_JIG_FIXTURE',
+  PE_SECTION_HEAD = 'PE_SECTION_HEAD',
+  PE_DEPT_HEAD = 'PE_DEPT_HEAD',
+  TAMU = 'TAMU',
+}
