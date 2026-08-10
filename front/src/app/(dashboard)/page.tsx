@@ -7,7 +7,7 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/view-data');
+    router.replace('/design');
   }, [router]);
 
   return (

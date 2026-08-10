@@ -6,6 +6,33 @@ import { UpdateDesignDto } from './dto/update-design.dto';
 export class DesignService {
   constructor(private prisma: PrismaService) {}
 
+  /**
+   * Generate a unique registration number.
+   * Format: JF-YYYY-XXXX or EQ-YYYY-XXXX
+   * XXXX = zero-padded sequential count among same type in same year.
+   */
+  private async generateNoReg(type: string): Promise<string> {
+    const prefix = type === 'EQ' ? 'EQ' : 'JF';
+    const year = new Date().getFullYear();
+
+    // Count existing designs with same prefix this year
+    const existing = await this.prisma.design.findMany({
+      where: { noReg: { startsWith: `${prefix}-${year}-` } },
+      select: { noReg: true },
+    });
+
+    // Find the highest sequence number in use
+    let maxSeq = 0;
+    for (const d of existing) {
+      const parts = d.noReg.split('-');
+      const seq = parseInt(parts[parts.length - 1], 10);
+      if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
+    }
+
+    const nextSeq = String(maxSeq + 1).padStart(4, '0');
+    return `${prefix}-${year}-${nextSeq}`;
+  }
+
   /** Get all items (alias for inventory list) for the design form dropdown */
   async getAllItems() {
     const designs = await this.prisma.design.findMany({
@@ -194,5 +221,99 @@ export class DesignService {
     return this.prisma.vendor.findMany({
       orderBy: { name: 'asc' },
     });
+  }
+
+  async getLinesAndProcesses() {
+    const [lines, processes] = await Promise.all([
+      this.prisma.line.findMany({ orderBy: { lineName: 'asc' } }),
+      this.prisma.process.findMany({ orderBy: { name: 'asc' } }),
+    ]);
+    return { lines, processes };
+  }
+
+  async createDesign(dto: any, userId: string) {
+    let lineId = dto.lineId;
+    if (!lineId && dto.lineName) {
+      const lineName = dto.lineName.trim();
+      const lineCode = lineName.toUpperCase().replace(/\s+/g, '_');
+      let line = await this.prisma.line.findFirst({
+        where: { lineName },
+      });
+      if (!line) {
+        line = await this.prisma.line.create({
+          data: { lineName, lineCode },
+        });
+      }
+      lineId = line.id;
+    }
+
+    let processId = dto.processId;
+    if (!processId && dto.processName) {
+      const name = dto.processName.trim();
+      const code = name.toUpperCase().replace(/\s+/g, '_');
+      let proc = await this.prisma.process.findFirst({
+        where: { name },
+      });
+      if (!proc) {
+        proc = await this.prisma.process.create({
+          data: { name, code },
+        });
+      }
+      processId = proc.id;
+    }
+
+    if (!lineId || !processId) {
+      throw new Error('Line and Process are required');
+    }
+
+    // Auto-generate noReg if not provided
+    const noReg = dto.noReg?.trim() || await this.generateNoReg(dto.type || 'JF');
+
+    const design = await this.prisma.design.create({
+      data: {
+        noReg,
+        assyPartName: dto.assyPartName,
+        noItem: dto.noItem || '',
+        qty: dto.qty || '1',
+        type: dto.type || 'JF',
+        lineId,
+        processId,
+        minimumStock: dto.minimumStock ? parseInt(String(dto.minimumStock), 10) : 0,
+        actualStock: dto.actualStock ? parseInt(String(dto.actualStock), 10) : 0,
+        revStatus: dto.revStatus || '0',
+        lifecycleStatus: dto.lifecycleStatus || 'ACTIVE',
+        vendorId: dto.vendorId || undefined,
+        designDateNew: dto.designDateNew ? new Date(dto.designDateNew) : new Date(),
+      },
+    });
+
+    if (dto.docLocation2D) {
+      await this.prisma.document.create({
+        data: {
+          designId: design.id,
+          path2D: dto.docLocation2D,
+          loc2D: dto.docLocation2D,
+          approvalStatus: 'APPROVED',
+        },
+      });
+    }
+
+    await this.prisma.revisionHistory.create({
+      data: {
+        designId: design.id,
+        revStatus: dto.revStatus || '0',
+        description: dto.revisionNote || 'Initial Release',
+        changedById: userId,
+        vendorId: dto.vendorId || undefined,
+        poNumber: dto.poNumber || undefined,
+        cost: dto.cost ? parseFloat(String(dto.cost)) : 0,
+        leadTime: dto.leadTime ? parseInt(String(dto.leadTime), 10) : undefined,
+        loc3D: dto.docLocation3D || undefined,
+        path3D: dto.docLocation3D || undefined,
+        approvedByName: 'System Admin (PIC)',
+      },
+    });
+
+    return design;
   }
 }

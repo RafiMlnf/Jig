@@ -14,9 +14,15 @@ export default function InventoryPage() {
 
   // Filter items
   const filteredItems = items.filter((item) => {
-    const matchesSearch =
-      item.noReg.toLowerCase().includes(search.toLowerCase()) ||
-      item.assyPartName.toLowerCase().includes(search.toLowerCase());
+    const searchTerms = search.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    const matchesSearch = searchTerms.every((term) => {
+      return (
+        item.noReg.toLowerCase().includes(term) ||
+        item.assyPartName.toLowerCase().includes(term) ||
+        item.lineProduct.toLowerCase().includes(term) ||
+        item.process.toLowerCase().includes(term)
+      );
+    });
 
     const matchesLine = lineFilter === 'All' || item.lineProduct === lineFilter;
 
@@ -43,16 +49,16 @@ export default function InventoryPage() {
   return (
     <div className="flex-1 flex flex-col p-4 bg-white h-full overflow-hidden">
       {/* Header controls */}
-      <header className="flex justify-between items-center mb-3">
+      <header className="flex justify-between items-center pb-3 mb-3 border-b border-gray-150">
         <div>
           <h2 className="text-base font-bold text-gray-800 flex items-center gap-1.5">
             <span className="material-symbols-outlined text-blue-500 text-lg">inventory_2</span>
-            Update Inventory (Fase 1)
+            Update Inventory
           </h2>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
-            <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs">search</span>
+            <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]" style={{ fontSize: '10px' }}>search</span>
             <input
               className="pl-7 pr-3 py-1 bg-gray-100 border border-gray-400 rounded-full text-[10px] w-48 focus:ring-1 focus:ring-primary outline-none text-gray-700 placeholder-gray-500"
               placeholder="Search No.Reg, Part Name..."
@@ -76,7 +82,7 @@ export default function InventoryPage() {
               ))}
             </select>
           </div>
-          <button className="bg-[#3b82f6] text-white px-2.5 py-0.5 rounded-full text-[9px] font-semibold flex items-center gap-1 hover:bg-blue-600 transition-colors cursor-pointer">
+          <button className="bg-[#0063ff] text-white px-2.5 py-0.5 rounded-full text-[9px] font-semibold flex items-center gap-1 hover:bg-[#0052d4] transition-colors cursor-pointer">
             <span className="material-symbols-outlined text-[12px]">download</span> Export
           </button>
         </div>
@@ -88,8 +94,8 @@ export default function InventoryPage() {
         <div
           onClick={() => setStatusFilter(statusFilter === 'GREEN' ? 'All' : 'GREEN')}
           className={`flex-1 rounded-xl px-3 py-1.5 flex items-center gap-3 shadow-sm border cursor-pointer transition-all ${statusFilter === 'GREEN'
-              ? 'bg-green-500/10 border-green-500'
-              : 'bg-surface border-outline-variant/30 hover:border-green-500/30'
+            ? 'bg-green-500/10 border-green-500'
+            : 'bg-surface border-outline-variant/30 hover:border-green-500/30'
             }`}
         >
           <div className="w-7 h-7 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
@@ -107,8 +113,8 @@ export default function InventoryPage() {
         <div
           onClick={() => setStatusFilter(statusFilter === 'YELLOW' ? 'All' : 'YELLOW')}
           className={`flex-1 rounded-xl px-3 py-1.5 flex items-center gap-3 shadow-sm border cursor-pointer transition-all ${statusFilter === 'YELLOW'
-              ? 'bg-yellow-500/10 border-yellow-500'
-              : 'bg-surface border-outline-variant/30 hover:border-yellow-500/30'
+            ? 'bg-yellow-500/10 border-yellow-500'
+            : 'bg-surface border-outline-variant/30 hover:border-yellow-500/30'
             }`}
         >
           <div className="w-7 h-7 rounded-full bg-yellow-500/20 flex items-center justify-center shrink-0">
@@ -126,8 +132,8 @@ export default function InventoryPage() {
         <div
           onClick={() => setStatusFilter(statusFilter === 'RED' ? 'All' : 'RED')}
           className={`flex-1 rounded-xl px-3 py-1.5 flex items-center gap-3 shadow-sm border cursor-pointer transition-all relative overflow-hidden ${statusFilter === 'RED'
-              ? 'bg-red-500/10 border-red-500'
-              : 'bg-surface border-outline-variant/30 hover:border-red-500/30'
+            ? 'bg-red-500/10 border-red-500'
+            : 'bg-surface border-outline-variant/30 hover:border-red-500/30'
             }`}
         >
           {redItems > 0 && <div className="absolute inset-0 bg-red-500/5 animate-pulse"></div>}
@@ -145,14 +151,13 @@ export default function InventoryPage() {
 
       {/* Main Table View */}
       <div className="flex-1 overflow-y-auto no-scrollbar rounded-lg border border-gray-200">
-        <table className="w-full text-left border-collapse text-[10px]">
+        <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="bg-gray-50 text-gray-500 font-semibold sticky top-0 z-10 border-b border-gray-200">
               <th className="px-3 py-2">No. Reg</th>
               <th className="px-2 py-2">Part Name</th>
               <th className="px-2 py-2">Line</th>
               <th className="px-2 py-2">Process</th>
-              <th className="px-2 text-center py-2">Rev Status</th>
               <th className="px-2 text-center py-2">Lifecycle</th>
               <th className="px-2 text-right py-2">Min Stock</th>
               <th className="px-2 text-right py-2">Actual</th>
@@ -182,18 +187,12 @@ export default function InventoryPage() {
                   <td className="px-2 text-gray-500 py-2">{item.lineProduct}</td>
                   <td className="px-2 text-gray-500 py-2">{item.process}</td>
                   <td className="px-2 text-center py-2">
-                    <span className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-[8px] font-bold">
-                      {item.revStatus}
-                    </span>
-                  </td>
-                  <td className="px-2 text-center py-2">
-                    <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${
-                      item.lifecycleStatus === 'UNDER_REPAIR' ? 'bg-orange-100 text-orange-700' :
-                      item.lifecycleStatus === 'UNDER_IMPROVEMENT' ? 'bg-blue-100 text-blue-700' :
-                      item.lifecycleStatus === 'OBSOLETE' ? 'bg-gray-100 text-gray-700' :
-                      item.lifecycleStatus === 'SCRAP' ? 'bg-red-100 text-red-700' :
-                      'bg-green-100 text-green-700'
-                    }`}>
+                    <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${item.lifecycleStatus === 'UNDER_REPAIR' ? 'bg-orange-100 text-orange-700' :
+                        item.lifecycleStatus === 'UNDER_IMPROVEMENT' ? 'bg-blue-100 text-blue-700' :
+                          item.lifecycleStatus === 'OBSOLETE' ? 'bg-gray-100 text-gray-700' :
+                            item.lifecycleStatus === 'SCRAP' ? 'bg-red-100 text-red-700' :
+                              'bg-green-100 text-green-700'
+                      }`}>
                       {item.lifecycleStatus || 'ACTIVE'}
                     </span>
                   </td>
@@ -204,11 +203,9 @@ export default function InventoryPage() {
                     }`}>
                     {item.actualStock}
                   </td>
-                  <td className="px-2 text-center py-2">
-                    <span
-                      className={`inline-block w-2 h-2 rounded-full ${isRed ? 'bg-red-500 animate-pulse' : isYellow ? 'bg-yellow-400' : 'bg-green-500'
-                        }`}
-                    ></span>
+                  <td className={`px-2 py-2 text-center font-bold text-[9px] uppercase tracking-wider ${isRed ? 'bg-red-500 text-white' : isYellow ? 'bg-yellow-400 text-yellow-950' : 'bg-green-500 text-white'
+                    }`}>
+                    {isRed ? 'Critical' : isYellow ? 'Warning' : 'Aman'}
                   </td>
                   {isPic && (
                     <td className="px-2 text-center py-2">

@@ -38,15 +38,15 @@ export default function ApprovalCenterPage() {
   return (
     <div className="flex-1 flex flex-col p-4 bg-white h-full overflow-hidden">
       {/* Header controls */}
-      <header className="flex justify-between items-center mb-3">
+      <header className="flex justify-between items-center pb-3 mb-3 border-b border-gray-150">
         <div>
           <h2 className="text-base font-bold text-gray-800 flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-purple-600 text-lg">fact_check</span>
-            Approval Center (Fase 2)
+            <span className="material-symbols-outlined text-[#0063ff] text-lg">fact_check</span>
+            Approval Center
           </h2>
           <p className="text-[10px] text-gray-500">Multistage approval gatekeeper for design revisions & critical stock updates</p>
         </div>
-        
+
         {/* Toggle Filters */}
         <div className="flex items-center gap-2">
           {/* Status Select */}
@@ -82,74 +82,72 @@ export default function ApprovalCenterPage() {
         </div>
       </header>
 
-      {/* PIC notice: can only track their submissions, not approve */}
-      {userIsPic && (
-        <div className="mb-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2 text-[9px] text-blue-700 font-semibold">
-          <span className="material-symbols-outlined text-[12px]">info</span>
-          Anda login sebagai PIC — dapat melihat status pengajuan, namun tidak dapat menyetujui atau menolak permintaan.
-        </div>
-      )}
-
       {/* Main List */}
       <div className="flex-1 overflow-y-auto no-scrollbar rounded-lg border border-gray-200 bg-gray-50 p-2">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           {filteredApprovals.map((app) => {
             const isWaiting = app.status === 'WAITING';
             const isApproved = app.status === 'APPROVED';
             const isRejected = app.status === 'REJECTED';
 
-            const statusBadgeColor = isWaiting 
-              ? 'bg-yellow-100 text-yellow-700' 
-              : isApproved 
-                ? 'bg-green-100 text-green-700' 
+            const statusBadgeColor = isWaiting
+              ? 'bg-yellow-100 text-yellow-700'
+              : isApproved
+                ? 'bg-green-100 text-green-700'
                 : 'bg-red-100 text-red-700';
 
             return (
-              <div 
-                key={app.id} 
-                className="bg-white border border-gray-200 rounded-xl p-3 flex flex-col justify-between shadow-sm relative group overflow-hidden"
+              <div
+                key={app.id}
+                className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm relative group overflow-hidden"
               >
                 {/* Visual Accent */}
-                <div className={`absolute left-0 top-0 bottom-0 w-1 ${
-                  app.type === 'Design Rev' ? 'bg-orange-400' : 'bg-purple-400'
-                }`}></div>
+                <div className={`absolute left-0 top-0 bottom-0 w-1 ${app.type === 'Design Rev' ? 'bg-[#0063ff]' : 'bg-[#00c6ff]'
+                  }`}></div>
 
-                <div className="pl-1.5 flex-1 flex flex-col justify-between">
-                  <div>
-                    {/* Header bar inside card */}
-                    <div className="flex justify-between items-start mb-1.5">
-                      <span className="text-[8px] bg-gray-100 text-gray-600 font-bold px-1.5 py-0.5 rounded">
-                        {app.noReg}
-                      </span>
-                      <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full ${statusBadgeColor}`}>
-                        {app.status}
-                      </span>
+                <div className="pl-2 grid grid-cols-2 gap-4">
+                  {/* Left Column: Info */}
+                  <div className="flex flex-col justify-between pr-2">
+                    <div>
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-[10px] bg-gray-100 text-gray-600 font-bold px-2 py-0.5 rounded font-mono">
+                          {app.noReg}
+                        </span>
+                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${statusBadgeColor}`}>
+                          {app.status}
+                        </span>
+                      </div>
+
+                      <h3 className="text-sm font-bold text-gray-800 leading-tight mb-1">
+                        {app.itemName}
+                      </h3>
+                      <div className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-wider">
+                        Tipe: {app.type}
+                      </div>
                     </div>
 
-                    <h3 className="text-xs font-bold text-gray-800 leading-tight mb-1 truncate">
-                      {app.itemName}
-                    </h3>
-                    <p className="text-[9px] text-gray-500 italic line-clamp-2 mb-3 bg-gray-50 p-1.5 rounded">
-                      "{app.note}"
-                    </p>
+                    <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-0.5 rounded-full w-fit mt-3">
+                      <img className="w-5 h-5 rounded-full border border-gray-300" src={app.authorAvatar} alt={app.author} />
+                      <span className="text-[10px] font-bold text-gray-600">{app.author}</span>
+                    </div>
                   </div>
 
-                  <div className="flex justify-between items-end border-t border-gray-100 pt-2 mt-auto">
-                    {/* Author details */}
-                    <div className="flex items-center gap-1 bg-gray-50 px-1.5 py-0.5 rounded-full">
-                      <img className="w-3.5 h-3.5 rounded-full border border-gray-300" src={app.authorAvatar} alt={app.author} />
-                      <span className="text-[7.5px] font-bold text-gray-600">{app.author}</span>
+                  {/* Right Column: Deskripsi */}
+                  <div className="border-l border-gray-200 pl-4 flex flex-col justify-between">
+                    <div>
+                      <span className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Deskripsi / Alasan</span>
+                      <p className="text-[11px] text-gray-500 italic bg-gray-50 p-2 rounded leading-relaxed">
+                        "{app.note}"
+                      </p>
                     </div>
-                    
-                    {/* Action link */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-[8px] font-bold text-gray-400">{app.type}</span>
-                      <Link 
+
+                    <div className="flex justify-end mt-3">
+                      <Link
                         href={`/approval-center/${app.id}`}
-                        className="py-1 px-2.5 bg-gray-900 text-white rounded-lg text-[9px] font-bold hover:bg-gray-800 transition-colors flex items-center gap-1 cursor-pointer"
+                        className="py-1 px-3 bg-gray-900 text-white rounded-lg text-xs font-bold hover:bg-gray-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
                       >
                         Review
-                        <span className="material-symbols-outlined text-[10px]">arrow_forward</span>
+                        <span className="material-symbols-outlined text-xs">arrow_forward</span>
                       </Link>
                     </div>
                   </div>
@@ -157,9 +155,9 @@ export default function ApprovalCenterPage() {
               </div>
             );
           })}
-          
+
           {filteredApprovals.length === 0 && (
-            <div className="col-span-2 text-center py-16 text-gray-400 text-xs">
+            <div className="text-center py-16 text-gray-400 text-xs">
               No items awaiting review.
             </div>
           )}

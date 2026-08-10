@@ -23,6 +23,32 @@ export async function fetchDesignItems() {
   return res.json();
 }
 
+/** Fetch lines and processes lists */
+export async function fetchLinesAndProcesses() {
+  const res = await fetch(`${BASE}/api/design/lines-processes`, {
+    headers: { Authorization: `Bearer ${getToken()}` },
+  });
+  if (!res.ok) throw new Error('Failed to fetch lines and processes');
+  return res.json();
+}
+
+/** Create a new design item directly */
+export async function createDesignItem(data: any) {
+  const res = await fetch(`${BASE}/api/design`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken()}`,
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || 'Failed to create design item');
+  }
+  return res.json();
+}
+
 /** Submit a design revision update */
 export async function submitDesignUpdate(itemId: string, data: {
   revStatus: string;
@@ -128,4 +154,30 @@ export async function fetchMasterList() {
   });
   if (!res.ok) throw new HttpError('Failed to fetch master list', res.status);
   return res.json();
+}
+
+/**
+ * Upload a PDF or 3D file to the backend.
+ * Returns { url, filename } where url is e.g. /uploads/myfile.pdf
+ */
+export async function uploadFile(file: File): Promise<{ url: string; filename: string }> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(`${BASE}/api/upload/pdf`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${getToken()}` },
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new HttpError(err.message || 'Gagal upload file', res.status);
+  }
+  return res.json();
+}
+
+/** Build a full URL for a stored file path like /uploads/foo.pdf */
+export function getFileUrl(path: string | null | undefined): string | null {
+  if (!path) return null;
+  if (path.startsWith('http')) return path;
+  return `http://localhost:3001${path}`;
 }

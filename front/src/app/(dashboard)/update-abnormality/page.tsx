@@ -174,29 +174,28 @@ export default function UpdateAbnormalityPage() {
       )}
 
       {/* Header */}
-      <header className="flex justify-between items-center mb-3">
+      <header className="flex justify-between items-center pb-3 mb-3 border-b border-gray-150">
         <div>
           <h2 className="text-base font-bold text-gray-800 flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-orange-500 text-lg">report_problem</span>
+            <span className="material-symbols-outlined text-[#0063ff] text-lg">report_problem</span>
             Update Abnormality
           </h2>
           <p className="text-[10px] text-gray-500">Laporkan kerusakan, keausan, atau ketidaknormalan pada Jig &amp; Fixture</p>
         </div>
-        <span className="text-[9px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded font-bold uppercase">Fase 3</span>
       </header>
 
       {/* Tabs */}
       <div className="flex gap-1 mb-3 bg-gray-100 p-1 rounded-lg w-fit">
         <button
           onClick={() => setActiveTab('form')}
-          className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${activeTab === 'form' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${activeTab === 'form' ? 'bg-white text-[#0063ff] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
         >
           <span className="material-symbols-outlined text-[12px] align-middle mr-0.5">add_circle</span>
           Buat Laporan
         </button>
         <button
           onClick={() => setActiveTab('list')}
-          className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${activeTab === 'list' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${activeTab === 'list' ? 'bg-white text-[#0063ff] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
         >
           <span className="material-symbols-outlined text-[12px] align-middle mr-0.5">list</span>
           Daftar Laporan
@@ -219,7 +218,7 @@ export default function UpdateAbnormalityPage() {
                 value={selectedItemId}
                 onChange={(e) => setSelectedItemId(e.target.value)}
                 required
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-orange-500 outline-none text-gray-700 font-medium"
+                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700 font-medium"
               >
                 <option value="">-- Pilih item --</option>
                 {items.map((item) => (
@@ -236,7 +235,7 @@ export default function UpdateAbnormalityPage() {
               <input
                 type="date"
                 required
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-orange-500 outline-none text-gray-700"
+                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700"
                 value={dateFound}
                 onChange={(e) => setDateFound(e.target.value)}
               />
@@ -249,7 +248,7 @@ export default function UpdateAbnormalityPage() {
                 type="text"
                 placeholder="Nama pelapor..."
                 required
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-orange-500 outline-none text-gray-700"
+                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700"
                 value={foundBy}
                 onChange={(e) => setFoundBy(e.target.value)}
               />
@@ -264,7 +263,7 @@ export default function UpdateAbnormalityPage() {
                     key={t}
                     type="button"
                     onClick={() => setAbnType(t)}
-                    className={`px-3 py-1 rounded-full text-[10px] font-bold border transition-all ${abnType === t ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-600 border-gray-300 hover:border-orange-400'}`}
+                    className={`px-3 py-1 rounded-full text-[10px] font-bold border transition-all ${abnType === t ? 'bg-[#0063ff] text-white border-[#0063ff]' : 'bg-white text-gray-600 border-gray-300 hover:border-[#0063ff]'}`}
                   >
                     {t}
                   </button>
@@ -279,7 +278,7 @@ export default function UpdateAbnormalityPage() {
                 placeholder="Detail gejala abnormal..."
                 required
                 rows={2}
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-orange-500 outline-none resize-none text-gray-700"
+                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none resize-none text-gray-700"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -291,7 +290,7 @@ export default function UpdateAbnormalityPage() {
               <textarea
                 placeholder="Penyebab akar dari masalah..."
                 rows={2}
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-orange-500 outline-none resize-none text-gray-700"
+                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none resize-none text-gray-700"
                 value={rootCause}
                 onChange={(e) => setRootCause(e.target.value)}
               />
@@ -303,7 +302,7 @@ export default function UpdateAbnormalityPage() {
               <textarea
                 placeholder="Solusi sementara..."
                 rows={2}
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-orange-500 outline-none resize-none text-gray-700"
+                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none resize-none text-gray-700"
                 value={tempAction}
                 onChange={(e) => setTempAction(e.target.value)}
               />
@@ -315,7 +314,7 @@ export default function UpdateAbnormalityPage() {
               <textarea
                 placeholder="Solusi jangka panjang..."
                 rows={2}
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-orange-500 outline-none resize-none text-gray-700"
+                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none resize-none text-gray-700"
                 value={correctiveAction}
                 onChange={(e) => setCorrectiveAction(e.target.value)}
               />
@@ -327,7 +326,7 @@ export default function UpdateAbnormalityPage() {
               <input
                 type="text"
                 placeholder="Nama PIC Tindakan..."
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-orange-500 outline-none text-gray-700"
+                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700"
                 value={actionPic}
                 onChange={(e) => setActionPic(e.target.value)}
               />
@@ -337,7 +336,7 @@ export default function UpdateAbnormalityPage() {
             <div>
               <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Status Laporan</label>
               <select
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-orange-500 outline-none text-gray-700 font-bold"
+                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700 font-bold"
                 value={status}
                 onChange={(e) => setStatus(e.target.value as any)}
               >
@@ -399,7 +398,7 @@ export default function UpdateAbnormalityPage() {
           </div>
 
           {/* Warning info */}
-          <div className="bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 text-[9px] text-orange-700 flex items-start gap-1.5">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-[9px] text-[#0063ff] flex items-start gap-1.5">
             <span className="material-symbols-outlined text-[12px] mt-0.5">warning</span>
             <span>Submit akan otomatis mengirimkan <strong>notifikasi darurat</strong> ke Section Head &amp; Dept Head untuk segera ditindaklanjuti.</span>
           </div>
@@ -407,7 +406,7 @@ export default function UpdateAbnormalityPage() {
           <button
             type="submit"
             disabled={submitting || !isPic}
-            className="w-fit py-2 px-6 bg-orange-500 text-white rounded-lg text-xs font-bold hover:bg-orange-600 transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+            className="w-fit py-2 px-6 bg-[#0063ff] text-white rounded-lg text-xs font-bold hover:bg-[#0052d4] transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
           >
             {submitting ? (
               <span className="material-symbols-outlined animate-spin text-sm">sync</span>
@@ -435,7 +434,7 @@ export default function UpdateAbnormalityPage() {
             <div className="flex-1 min-w-[150px] relative">
               <span className="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">search</span>
               <input
-                className="pl-6 pr-2 py-1 bg-white border border-gray-300 rounded-full text-[10px] w-full focus:ring-1 focus:ring-orange-400 outline-none text-gray-700"
+                className="pl-6 pr-2 py-1 bg-white border border-gray-300 rounded-full text-[10px] w-full focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700"
                 placeholder="Cari No. Reg..."
                 value={searchRegId}
                 onChange={(e) => setSearchRegId(e.target.value)}
@@ -488,7 +487,7 @@ export default function UpdateAbnormalityPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto no-scrollbar rounded-lg border border-gray-200">
-            <table className="w-full text-left border-collapse text-[10px]">
+            <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-gray-50 text-gray-500 font-semibold sticky top-0 border-b border-gray-200">
                   <th className="px-3 py-2">No. Reg</th>
@@ -517,7 +516,7 @@ export default function UpdateAbnormalityPage() {
                           {r.item.noReg}
                         </td>
                         <td className="px-2 py-2">
-                          <span className="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded text-[8px] font-bold">
+                          <span className="bg-blue-50 text-[#0063ff] border border-blue-200 px-1.5 py-0.5 rounded text-[8px] font-bold">
                             {r.item.type || 'JF'}
                           </span>
                         </td>

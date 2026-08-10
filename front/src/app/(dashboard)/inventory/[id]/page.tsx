@@ -96,7 +96,7 @@ export default function EditInventoryPage({ params }: PageProps) {
       )}
 
       {/* Header */}
-      <header className="flex justify-between items-center mb-3">
+      <header className="flex justify-between items-center pb-3 mb-3 border-b border-gray-150">
         <div className="flex items-center gap-2">
           <Link href="/inventory" className="text-gray-500 hover:text-gray-800 flex items-center">
             <span className="material-symbols-outlined text-base font-bold">arrow_back</span>
@@ -248,7 +248,7 @@ export default function EditInventoryPage({ params }: PageProps) {
               {isPic && (
                 <button
                   type="submit"
-                  className="flex-1 py-1.5 bg-[#3b82f6] text-white rounded-lg text-xs font-bold hover:bg-blue-600 transition-colors cursor-pointer"
+                  className="flex-1 py-1.5 bg-[#0063ff] text-white rounded-lg text-xs font-bold hover:bg-[#0052d4] transition-colors cursor-pointer"
                 >
                   Save Stock
                 </button>

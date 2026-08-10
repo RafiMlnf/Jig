@@ -28,7 +28,9 @@
   --color-accent-green: #a8f3aa;
   --color-accent-pink: #ffaec6;
 
-  --font-sans: 'Geist', sans-serif;
+  /* Google Sans as universal app font */
+  --font-sans: 'Google Sans', 'Roboto', sans-serif;
+  --font-mono: 'Google Sans Mono', 'Google Sans', monospace;
 }
 
 @utility no-scrollbar {
@@ -52,8 +54,20 @@
   background-image: repeating-radial-gradient(circle at 0 0, transparent 0, transparent 10px, rgba(0, 0, 0, 0.05) 10px, rgba(0, 0, 0, 0.05) 20px);
 }
 
+/* Force Google Sans everywhere — override all browser/system defaults */
+*, *::before, *::after {
+  font-family: 'Google Sans', 'Roboto', sans-serif;
+}
+
+/* Code/pre blocks use Google Sans Mono */
+code, pre, kbd, samp {
+  font-family: 'Google Sans Mono', 'Google Sans', monospace;
+}
+
 body {
+  font-family: 'Google Sans', 'Roboto', sans-serif;
   zoom: 1.12;
   width: calc(100vw / 1.12);
   height: calc(100vh / 1.12);
 }
+
