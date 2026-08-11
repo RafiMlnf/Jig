@@ -181,3 +181,19 @@ export function getFileUrl(path: string | null | undefined): string | null {
   if (path.startsWith('http')) return path;
   return `http://localhost:3001${path}`;
 }
+
+/** Delete a design item and all related records */
+export async function deleteDesignItem(id: string) {
+  const res = await fetch(`${BASE}/api/design/${id}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Failed to delete design item');
+  }
+  return res.json();
+}
+

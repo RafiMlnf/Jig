@@ -11,12 +11,15 @@
   "dependencies": {
     "@prisma/client": "^7.9.1",
     "@types/js-cookie": "^3.0.6",
+    "@types/three": "^0.185.4",
     "dotenv": "^17.4.2",
     "exceljs": "^4.4.0",
     "js-cookie": "^3.0.8",
     "next": "16.3.0",
+    "occt-import-js": "^0.0.23",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "three": "^0.185.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

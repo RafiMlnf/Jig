@@ -12,18 +12,24 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+    // Find user by NPK (username) or Email
+    const user = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { npk: dto.email },
+          { email: dto.email }
+        ]
+      },
       include: { role: true },
     });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException('Invalid NPK/Email or password');
     }
 
     const isPasswordValid = bcrypt.compareSync(dto.password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException('Invalid NPK/Email or password');
     }
 
     const payload = { email: user.email, sub: user.id, role: user.role.name };

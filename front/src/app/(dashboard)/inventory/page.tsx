@@ -47,9 +47,9 @@ export default function InventoryPage() {
   const uniqueLines = ['All', ...Array.from(new Set(items.map((i) => i.lineProduct)))];
 
   return (
-    <div className="flex-1 flex flex-col p-4 bg-white h-full overflow-hidden">
+    <div className="flex-1 flex flex-col px-4 pb-4 pt-2 bg-white h-full overflow-hidden">
       {/* Header controls */}
-      <header className="flex justify-between items-center pb-3 mb-3 border-b border-gray-150">
+      <header className="h-12 flex justify-between items-center border-b border-gray-150 mb-3 shrink-0">
         <div>
           <h2 className="text-base font-bold text-gray-800 flex items-center gap-1.5">
             <span className="material-symbols-outlined text-blue-500 text-lg">inventory_2</span>

@@ -87,7 +87,7 @@ export default function EditInventoryPage({ params }: PageProps) {
   };
 
   return (
-    <div className="flex-1 flex flex-col p-5 bg-white h-full overflow-hidden relative">
+    <div className="flex-1 flex flex-col px-5 pb-5 pt-2.5 bg-white h-full overflow-hidden relative">
       {/* Toast Alert */}
       {toastMessage && (
         <div className="absolute top-5 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-lg z-50 transition-opacity duration-300">
@@ -96,7 +96,7 @@ export default function EditInventoryPage({ params }: PageProps) {
       )}
 
       {/* Header */}
-      <header className="flex justify-between items-center pb-4 mb-4 border-b border-gray-200">
+      <header className="h-12 flex justify-between items-center border-b border-gray-200 mb-4 shrink-0">
         <div className="flex items-center gap-2.5">
           <Link href="/inventory" className="text-gray-500 hover:text-gray-800 flex items-center">
             <span className="material-symbols-outlined text-lg font-bold">arrow_back</span>

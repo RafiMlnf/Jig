@@ -83,3 +83,22 @@ body {
   height: calc(100vh / 1.12);
 }
 
+@keyframes vibrate {
+  0% { transform: translate(0, 0); }
+  2% { transform: translate(-1.5px, 0.5px); }
+  4% { transform: translate(1.5px, -0.5px); }
+  6% { transform: translate(-1.5px, -0.5px); }
+  8% { transform: translate(1.5px, 0.5px); }
+  10% { transform: translate(-1.5px, 0.5px); }
+  12% { transform: translate(1.5px, -0.5px); }
+  14% { transform: translate(-1.5px, -0.5px); }
+  16% { transform: translate(1.5px, 0.5px); }
+  18% { transform: translate(-1.5px, 0.5px); }
+  20% { transform: translate(0, 0); }
+  100% { transform: translate(0, 0); }
+}
+
+.animate-vibrate {
+  animation: vibrate 3.2s linear infinite;
+}
+

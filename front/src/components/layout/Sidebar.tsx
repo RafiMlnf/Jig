@@ -176,7 +176,7 @@ export default function Sidebar() {
                       {item.icon}
                     </span>
                     <span className="font-medium text-xs flex-1">{item.name}</span>
-                    {item.badge !== undefined && (
+                    {item.badge !== undefined && item.badge > 0 && (
                       <span className="bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                         {item.badge}
                       </span>

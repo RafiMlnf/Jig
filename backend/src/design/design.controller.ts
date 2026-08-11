@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Body, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, Request, UseGuards } from '@nestjs/common';
 import { DesignService } from './design.service';
 import { UpdateDesignDto } from './dto/update-design.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -55,5 +55,11 @@ export class DesignController {
   @Get(':id/history')
   getHistory(@Param('id') id: string) {
     return this.designService.getDesignHistory(id);
+  }
+
+  /** Delete a design item and all its related records */
+  @Delete(':id')
+  deleteDesign(@Param('id') id: string) {
+    return this.designService.deleteDesign(id);
   }
 }

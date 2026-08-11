@@ -27,6 +27,7 @@ export interface JigFixtureItem {
 export interface ApprovalItem {
   id: string;
   noReg: string;
+  designId?: string;   // UUID of the design item
   itemName: string;
   date: string;
   author: string;
@@ -36,6 +37,8 @@ export interface ApprovalItem {
   status: 'WAITING' | 'APPROVED' | 'REJECTED';
   color: string;
   has3DRender?: boolean;
+  sectionStatus?: 'WAITING' | 'APPROVED' | 'REJECTED';
+  deptStatus?: 'WAITING' | 'APPROVED' | 'REJECTED';
 }
 
 export interface AuthUser {

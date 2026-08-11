@@ -39,6 +39,7 @@ function mapBackendApproval(backend: any): ApprovalItem {
   return {
     id: backend.id,
     noReg: backend.item?.noReg || 'N/A',
+    designId: backend.item?.id || backend.designId || undefined,  // UUID of design item
     itemName: backend.item?.assyPartName || 'N/A',
     date: formattedDate,
     author: backend.submittedBy?.name || 'PIC Submitter',
@@ -48,6 +49,8 @@ function mapBackendApproval(backend: any): ApprovalItem {
     status: backend.status,
     color: backend.type === 'DESIGN_REVISION' ? 'bg-accent-orange border-orange-200/50' : 'bg-[#d8b4fe] border-purple-300/50',
     has3DRender: backend.item?.type === 'JF',
+    sectionStatus: backend.sectionStatus,
+    deptStatus: backend.deptStatus,
   };
 }
 

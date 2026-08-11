@@ -36,9 +36,9 @@ export default function ApprovalCenterPage() {
   });
 
   return (
-    <div className="flex-1 flex flex-col p-4 bg-white h-full overflow-hidden">
+    <div className="flex-1 flex flex-col px-4 pb-4 pt-2 bg-white h-full overflow-hidden">
       {/* Header controls */}
-      <header className="flex justify-between items-center pb-3 mb-3 border-b border-gray-150">
+      <header className="h-12 flex justify-between items-center border-b border-gray-150 mb-3 shrink-0">
         <div>
           <h2 className="text-base font-bold text-gray-800 flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[#0063ff] text-lg">fact_check</span>
@@ -81,114 +81,145 @@ export default function ApprovalCenterPage() {
         </div>
       </header>
 
-      {/* Main List */}
-      <div className="flex-1 overflow-y-auto no-scrollbar rounded-lg border border-gray-200 bg-gray-50 p-2">
-        <div className="grid grid-cols-1 gap-3">
-          {filteredApprovals.map((app) => {
-            const isWaiting = app.status === 'WAITING';
-            const isApproved = app.status === 'APPROVED';
-            const isRejected = app.status === 'REJECTED';
+      {/* Main Table */}
+      <div className="flex-1 overflow-x-auto rounded-xl border border-gray-200 bg-white">
+        <table className="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-150 text-gray-500 font-bold uppercase tracking-wider text-[9px]">
+              <th className="py-2.5 px-4">No. Reg</th>
+              <th className="py-2.5 px-4">Item Name / Assy</th>
+              <th className="py-2.5 px-4">Type</th>
+              <th className="py-2.5 px-4">Submitter</th>
+              <th className="py-2.5 px-4">Description / Note</th>
+              <th className="py-2.5 px-4 text-center">Approval Progress</th>
+              <th className="py-2.5 px-4 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
+            {filteredApprovals.map((app) => {
+              // PE is always APPROVED since they submitted it
+              const peStatus = 'APPROVED';
+              const secStatus = app.sectionStatus || 'WAITING';
+              const deptStatus = app.deptStatus || 'WAITING';
 
-            const statusBadgeColor = isWaiting
-              ? 'bg-yellow-100 text-yellow-700'
-              : isApproved
-                ? 'bg-green-100 text-green-700'
-                : 'bg-red-100 text-red-700';
+              // Sequential: DEPT is "locked" (not yet in queue) if SEC hasn't approved yet
+              const deptLocked = secStatus !== 'APPROVED';
 
-            return (
-              <div
-                key={app.id}
-                className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm relative group overflow-hidden"
-              >
-                {/* Visual Accent */}
-                <div className={`absolute left-0 top-0 bottom-0 w-1 ${app.type === 'Design Rev' ? 'bg-[#0063ff]' : 'bg-[#00c6ff]'
-                  }`}></div>
+              const getDotColor = (status: 'WAITING' | 'APPROVED' | 'REJECTED', locked?: boolean) => {
+                if (locked) return 'bg-gray-300';   // Not yet in queue
+                if (status === 'APPROVED') return 'bg-green-500';
+                if (status === 'REJECTED') return 'bg-red-500 animate-pulse';
+                return 'bg-yellow-400';
+              };
 
-                <div className="pl-2 grid grid-cols-2 gap-4">
-                  {/* Left Column: Info */}
-                  <div className="flex flex-col justify-center pr-2 gap-3">
-                    <div>
-                      <div className="flex justify-between items-center mb-2 gap-2">
-                        <h3 className="text-sm font-bold text-gray-800 leading-tight">
-                          {app.itemName}
-                        </h3>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {isApproved && (
-                            <div className="flex items-center gap-1 text-green-700">
-                              <span className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center shadow-2xs">
-                                <span className="material-symbols-outlined text-[13px] font-black leading-none">check</span>
-                              </span>
-                              <span className="text-[9px] font-extrabold uppercase tracking-wide leading-none">Approved</span>
-                            </div>
-                          )}
-                          {isWaiting && (
-                            <div className="flex items-center gap-1 text-yellow-605">
-                              <span className="w-6 h-6 rounded-full bg-yellow-500 text-white flex items-center justify-center shadow-2xs">
-                                <span className="material-symbols-outlined text-[13px] font-black leading-none">more_horiz</span>
-                              </span>
-                              <span className="text-[9px] font-extrabold uppercase tracking-wide leading-none">Waiting</span>
-                            </div>
-                          )}
-                          {isRejected && (
-                            <div className="flex items-center gap-1 text-red-700">
-                              <span className="w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center shadow-2xs">
-                                <span className="material-symbols-outlined text-[13px] font-black leading-none">close</span>
-                              </span>
-                              <span className="text-[9px] font-extrabold uppercase tracking-wide leading-none">Rejected</span>
-                            </div>
-                          )}
-                        </div>
+              const getDotTitle = (role: string, status: string, locked?: boolean) => {
+                if (locked) return `${role}: Awaiting previous step`;
+                return `${role}: ${status.toUpperCase()}`;
+              };
+
+              return (
+                <tr key={app.id} className="hover:bg-gray-50 transition-colors">
+                  {/* Reg No */}
+                  <td className="py-3 px-4 font-mono text-[10px] text-gray-900 font-bold">
+                    {app.noReg}
+                  </td>
+
+                  {/* Item Name */}
+                  <td className="py-3 px-4 text-[11px] font-bold text-gray-800">
+                    {app.itemName}
+                  </td>
+
+                  {/* Type */}
+                  <td className="py-3 px-4">
+                    <span
+                      className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide ${
+                        app.type === 'Design Rev'
+                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                          : 'bg-purple-50 text-purple-700 border border-purple-200'
+                      }`}
+                    >
+                      {app.type}
+                    </span>
+                  </td>
+
+                  {/* Submitter */}
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-1.5">
+                      <img
+                        className="w-4 h-4 rounded-full border border-gray-300"
+                        src={app.authorAvatar}
+                        alt={app.author}
+                      />
+                      <span className="text-[10px] text-gray-600 font-semibold">{app.author}</span>
+                    </div>
+                  </td>
+
+                  {/* Description */}
+                  <td className="py-3 px-4 text-gray-500 max-w-[220px] truncate italic" title={app.note}>
+                    "{app.note || '—'}"
+                  </td>
+
+                  {/* Approval Progress (3-Dot Status) */}
+                  <td className="py-3 px-4">
+                    <div className="flex items-center justify-center gap-3">
+                      {/* PE Dot */}
+                      <div className="flex flex-col items-center gap-1 group relative">
+                        <div
+                          className={`w-3.5 h-3.5 rounded-full ${getDotColor(peStatus)} shadow-2xs border-2 border-white`}
+                          title={getDotTitle('PE Submitter', peStatus)}
+                        />
+                        <span className="text-[8px] font-mono text-gray-400 font-bold group-hover:text-gray-600">PE</span>
                       </div>
 
-                      <div className="flex flex-col gap-1 mt-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">No. Reg:</span>
-                          <span className="text-[10px] bg-gray-100 text-gray-700 font-bold px-2 py-0.5 rounded font-mono">
-                            {app.noReg}
-                          </span>
-                        </div>
-                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                          Tipe: {app.type}
-                        </div>
+                      {/* Line connector */}
+                      <div className="w-4 h-0.5 bg-gray-250 -mt-2" />
+
+                      {/* Section Head Dot */}
+                      <div className="flex flex-col items-center gap-1 group relative">
+                        <div
+                          className={`w-3.5 h-3.5 rounded-full ${getDotColor(secStatus)} shadow-2xs border-2 border-white`}
+                          title={getDotTitle('Section Head', secStatus)}
+                        />
+                        <span className="text-[8px] font-mono text-gray-400 font-bold group-hover:text-gray-600">SEC</span>
+                      </div>
+
+                      {/* Line connector */}
+                      <div className="w-4 h-0.5 bg-gray-250 -mt-2" />
+
+                      {/* Dept Head Dot */}
+                      <div className="flex flex-col items-center gap-1 group relative">
+                        <div
+                          className={`w-3.5 h-3.5 rounded-full ${getDotColor(deptStatus, deptLocked)} shadow-2xs border-2 border-white`}
+                          title={getDotTitle('Dept Head', deptStatus, deptLocked)}
+                        />
+                        <span className="text-[8px] font-mono text-gray-400 font-bold group-hover:text-gray-600">DEPT</span>
                       </div>
                     </div>
+                  </td>
 
-                    <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-0.5 rounded-full w-fit mt-3">
-                      <img className="w-5 h-5 rounded-full border border-gray-300" src={app.authorAvatar} alt={app.author} />
-                      <span className="text-[10px] font-bold text-gray-600">{app.author}</span>
-                    </div>
-                  </div>
+                  {/* Action */}
+                  <td className="py-3 px-4 text-center">
+                    <Link
+                      href={`/approval-center/${app.id}`}
+                      className="text-gray-550 hover:text-gray-900 transition-colors inline-flex items-center justify-center"
+                      title="Review Approval"
+                    >
+                      <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
 
-                  {/* Right Column: Deskripsi */}
-                  <div className="border-l border-gray-200 pl-4 flex flex-col justify-between">
-                    <div>
-                      <span className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Deskripsi / Alasan</span>
-                      <p className="text-[11px] text-gray-500 italic bg-gray-50 p-2 rounded leading-relaxed">
-                        "{app.note}"
-                      </p>
-                    </div>
-
-                    <div className="flex justify-end mt-3">
-                      <Link
-                        href={`/approval-center/${app.id}`}
-                        className="py-1 px-3 bg-gray-900 text-white rounded-lg text-xs font-bold hover:bg-gray-800 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                      >
-                        Review
-                        <span className="material-symbols-outlined text-xs">arrow_forward</span>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-
-          {filteredApprovals.length === 0 && (
-            <div className="text-center py-16 text-gray-400 text-xs">
-              No items awaiting review.
-            </div>
-          )}
-        </div>
+            {filteredApprovals.length === 0 && (
+              <tr>
+                <td colSpan={7} className="text-center py-12 text-gray-400 italic">
+                  Tidak ada data persetujuan yang sesuai filter.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

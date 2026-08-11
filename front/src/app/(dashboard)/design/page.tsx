@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
-import { fetchMasterList, fetchVendors, fetchLinesAndProcesses, createDesignItem, submitDesignUpdate, fetchDashboardAlerts, uploadFile, getFileUrl } from '@/lib/api/phase3';
+import { fetchMasterList, fetchVendors, fetchLinesAndProcesses, createDesignItem, submitDesignUpdate, fetchDashboardAlerts, uploadFile, getFileUrl, deleteDesignItem } from '@/lib/api/phase3';
 import { canEdit } from '@/lib/rbac';
 
 interface DocumentInfo {
@@ -229,6 +229,8 @@ export function DesignPageContent() {
   const [globalRevisionItemId, setGlobalRevisionItemId] = useState('');
   const [globalRevisionItemSearch, setGlobalRevisionItemSearch] = useState('');
   const [isGlobalRevisionDropdownOpen, setIsGlobalRevisionDropdownOpen] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<MasterItem | null>(null);
 
   // Lists for dropdown
   const [lines, setLines] = useState<any[]>([]);
@@ -280,6 +282,24 @@ export function DesignPageContent() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenDeleteConfirm = (item: MasterItem) => {
+    setItemToDelete(item);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      await deleteDesignItem(itemToDelete.id);
+      setToast({ type: 'success', msg: `Desain ${itemToDelete.noReg} berhasil dihapus!` });
+      setShowDeleteConfirmModal(false);
+      setItemToDelete(null);
+      await loadData();
+    } catch (err: any) {
+      setToast({ type: 'error', msg: err.message || 'Gagal menghapus desain' });
     }
   };
 
@@ -711,9 +731,9 @@ export function DesignPageContent() {
   };
 
   return (
-    <div className="flex-1 flex flex-col p-4 bg-white h-full overflow-hidden">
+    <div className="flex-1 flex flex-col px-4 pb-4 pt-2 bg-white h-full overflow-hidden">
       {/* Header */}
-      <header className="flex justify-between items-center pb-3 mb-3 border-b border-gray-150">
+      <header className="h-12 flex justify-between items-center border-b border-gray-150 mb-3 shrink-0">
         <div>
           <h2 className="text-base font-bold text-gray-800 flex items-center gap-1.5">
             <span className="material-symbols-outlined text-blue-600 text-lg">database</span>
@@ -745,7 +765,7 @@ export function DesignPageContent() {
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="bg-red-600 hover:bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center relative cursor-pointer shadow-sm transition-all shrink-0"
+                className="bg-red-600 hover:bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center relative cursor-pointer shadow-sm transition-all shrink-0 animate-vibrate"
                 title="Pemberitahuan Sistem"
               >
                 <span className="material-symbols-outlined text-[16px]">notifications</span>
@@ -997,13 +1017,22 @@ export function DesignPageContent() {
                     </td>
                     {isPic && (
                       <td className="px-2 py-2 text-center" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => handleOpenEditModal(item)}
-                          className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer inline-flex items-center justify-center mx-auto"
-                          title="Update Desain"
-                        >
-                          <span className="material-symbols-outlined text-[10px]">edit</span>
-                        </button>
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            onClick={() => handleOpenEditModal(item)}
+                            className="text-gray-650 hover:text-gray-900 transition-colors cursor-pointer inline-flex items-center justify-center"
+                            title="Update Desain"
+                          >
+                            <span className="material-symbols-outlined text-[11px]">edit</span>
+                          </button>
+                          <button
+                            onClick={() => handleOpenDeleteConfirm(item)}
+                            className="text-gray-655 hover:text-red-650 transition-colors cursor-pointer inline-flex items-center justify-center"
+                            title="Hapus Desain"
+                          >
+                            <span className="material-symbols-outlined text-[11px]">delete</span>
+                          </button>
+                        </div>
                       </td>
                     )}
                   </tr>
@@ -1038,15 +1067,7 @@ export function DesignPageContent() {
             {/* Form Body */}
             <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
               <div className="grid grid-cols-2 gap-3.5">
-                {/* Registration Number — auto-generated */}
-                <div className="col-span-2">
-                  <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Nomor Registrasi</label>
-                  <div className="w-full border border-dashed border-blue-300 rounded-lg px-3 py-2 text-xs text-blue-600 font-semibold bg-blue-50 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-sm text-blue-500">auto_fix_high</span>
-                    <span>Akan di-generate otomatis oleh sistem</span>
-                    <span className="ml-auto text-[9px] text-blue-400 font-mono">{(typeFilter === 'EQ' ? 'EQ' : 'JF')}-{new Date().getFullYear()}-XXXX</span>
-                  </div>
-                </div>
+
 
                 {/* Assembly Part Name */}
                 <div className="col-span-2">

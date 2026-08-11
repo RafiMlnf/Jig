@@ -324,4 +324,17 @@ export class DesignService {
 
     return design;
   }
+
+  async deleteDesign(id: string) {
+    // Atomically delete all relations followed by the design item
+    return this.prisma.$transaction([
+      this.prisma.document.deleteMany({ where: { designId: id } }),
+      this.prisma.revisionHistory.deleteMany({ where: { designId: id } }),
+      this.prisma.abnormality.deleteMany({ where: { designId: id } }),
+      this.prisma.inventoryLog.deleteMany({ where: { designId: id } }),
+      this.prisma.approval.deleteMany({ where: { designId: id } }),
+      this.prisma.notification.deleteMany({ where: { designId: id } }),
+      this.prisma.design.delete({ where: { id } }),
+    ]);
+  }
 }

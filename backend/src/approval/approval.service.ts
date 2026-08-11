@@ -116,7 +116,16 @@ export class ApprovalService {
     const approval = await this.prisma.approval.findUnique({
       where: { id },
       include: {
-        design: { include: { line: true, process: true, vendor: true } },
+        design: {
+          include: {
+            line: true,
+            process: true,
+            vendor: true,
+            revisionHistories: {
+              orderBy: { createdAt: 'desc' },
+            },
+          },
+        },
         submittedBy: true,
         sectionHead: true,
         deptHead: true,
