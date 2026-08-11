@@ -24,6 +24,10 @@ interface RevHistoryInfo {
   createdAt: string;
   vendorName: string;
   changedBy: string;
+  loc3D?: string | null;
+  path3D?: string | null;
+  loc2D?: string | null;
+  path2D?: string | null;
 }
 
 interface AbnormalityInfo {
@@ -79,6 +83,7 @@ export default function DesignDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<InspectorTab>('info');
   const [inspectorOpen, setInspectorOpen] = useState(true);
+  const [downloadDropdownOpen, setDownloadDropdownOpen] = useState(false);
 
   const loadItem = async () => {
     setLoading(true);
@@ -121,9 +126,10 @@ export default function DesignDetailPage({ params }: PageProps) {
   const stockColor = isRed ? '#dc2626' : isYellow ? '#ca8a04' : '#16a34a';
   const stockLabel = isRed ? 'Critical' : isYellow ? 'Warning' : 'Aman';
 
-  const activeDoc = item.documents.find((d) => d.approvalStatus === 'APPROVED' && d.loc2D)
-    || item.documents.find((d) => d.loc2D)
-    || item.documents[0];
+  const reversedDocs = [...item.documents].reverse();
+  const activeDoc = reversedDocs.find((d) => d.approvalStatus === 'APPROVED' && d.loc2D)
+    || reversedDocs.find((d) => d.loc2D)
+    || reversedDocs[0];
 
   const lifecycleBadge: Record<string, { color: string; label: string }> = {
     ACTIVE: { color: '#16a34a', label: 'Active' },
@@ -185,18 +191,67 @@ export default function DesignDetailPage({ params }: PageProps) {
         </div>
 
         {/* Right: actions */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          {activeDoc?.loc2D && (
-            <a
-              href={activeDoc.loc2D}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-[9px] font-bold bg-red-50 hover:bg-red-100 text-red-650 px-2 py-1 rounded transition-colors border border-red-200"
+        <div className="flex items-center gap-1.5 shrink-0 relative">
+          <div className="relative">
+            <button
+              onClick={() => setDownloadDropdownOpen(!downloadDropdownOpen)}
+              className={`flex items-center justify-center w-6 h-6 rounded transition-colors hover:bg-gray-150 text-gray-500 ${downloadDropdownOpen ? 'bg-gray-150 text-gray-800' : ''}`}
+              title="Unduh Dokumen"
             >
-              <span className="material-symbols-outlined text-[11px]">picture_as_pdf</span>
-              Unduh 2D
-            </a>
-          )}
+              <span className="material-symbols-outlined text-[16px]">download</span>
+            </button>
+
+            {downloadDropdownOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setDownloadDropdownOpen(false)}
+                ></div>
+
+                <div className="absolute right-0 mt-1 w-28 bg-white border border-gray-300 rounded-lg shadow-lg z-50 py-1 text-[10px] text-gray-700">
+                  {activeDoc?.loc2D ? (
+                    <a
+                      href={activeDoc.loc2D}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setDownloadDropdownOpen(false)}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 hover:bg-gray-50 text-gray-700 font-bold transition-colors cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[12px] text-gray-550">picture_as_pdf</span>
+                      2D Drawing
+                    </a>
+                  ) : (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-gray-500 opacity-40 font-bold cursor-not-allowed select-none">
+                      <span className="material-symbols-outlined text-[12px]">picture_as_pdf</span>
+                      2D Drawing
+                    </div>
+                  )}
+
+                  {(() => {
+                    const active3D = item.revisionHistories.find((rev) => rev.loc3D)?.loc3D;
+                    return active3D ? (
+                      <a
+                        href={active3D}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setDownloadDropdownOpen(false)}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 hover:bg-gray-50 text-gray-700 font-bold transition-colors cursor-pointer border-t border-gray-100"
+                      >
+                        <span className="material-symbols-outlined text-[12px] text-gray-550">deployed_code</span>
+                        3D Model
+                      </a>
+                    ) : (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-gray-500 opacity-40 font-bold cursor-not-allowed select-none border-t border-gray-100">
+                        <span className="material-symbols-outlined text-[12px]">deployed_code</span>
+                        3D Model
+                      </div>
+                    );
+                  })()}
+                </div>
+              </>
+            )}
+          </div>
+
           <button
             onClick={() => setInspectorOpen(!inspectorOpen)}
             className={`flex items-center justify-center w-6 h-6 rounded transition-colors ${inspectorOpen ? 'bg-blue-50 text-blue-650 border border-blue-200' : 'hover:bg-gray-200 text-gray-500'}`}
@@ -377,6 +432,32 @@ export default function DesignDetailPage({ params }: PageProps) {
                           <div className="mt-1.5 pt-1.5 border-t border-gray-50 text-[8px] text-gray-400 flex justify-between">
                             <span>Approved by</span>
                             <span className="text-gray-700 font-bold">{rev.approvedByName}</span>
+                          </div>
+                        )}
+                        {(rev.loc2D || rev.loc3D) && (
+                          <div className="mt-2 pt-2 border-t border-dashed border-gray-100 flex gap-2">
+                            {rev.loc2D && (
+                              <a
+                                href={getFileUrl(rev.loc2D)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex-1 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-[8px] font-bold transition-all text-center flex items-center justify-center gap-1"
+                              >
+                                <span className="material-symbols-outlined text-[10px]">download</span>
+                                2D Drawing
+                              </a>
+                            )}
+                            {rev.loc3D && (
+                              <a
+                                href={getFileUrl(rev.loc3D)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex-1 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded text-[8px] font-bold transition-all text-center flex items-center justify-center gap-1"
+                              >
+                                <span className="material-symbols-outlined text-[10px]">download</span>
+                                3D Model
+                              </a>
+                            )}
                           </div>
                         )}
                       </div>

@@ -158,6 +158,8 @@ model RevisionHistory {
   approvedByName String?  @map("approved_by_name")
   path3D         String?  @map("3d_path")
   loc3D          String?  @map("3d_loc")
+  path2D         String?  @map("2d_path")
+  loc2D          String?  @map("2d_loc")
 
   createdAt      DateTime @default(now()) @map("created_at")
 

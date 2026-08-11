@@ -61,6 +61,8 @@ export default function UpdateAbnormalityPage() {
 
   // Form states
   const [selectedItemId, setSelectedItemId] = useState('');
+  const [itemSearchQuery, setItemSearchQuery] = useState('');
+  const [isItemDropdownOpen, setIsItemDropdownOpen] = useState(false);
   const [abnType, setAbnType] = useState('RUSAK');
   const [dateFound, setDateFound] = useState(new Date().toISOString().split('T')[0]);
   const [foundBy, setFoundBy] = useState('');
@@ -133,6 +135,7 @@ export default function UpdateAbnormalityPage() {
 
       // Reset form
       setSelectedItemId('');
+      setItemSearchQuery('');
       setDescription('');
       setFoundBy('');
       setRootCause('');
@@ -180,8 +183,22 @@ export default function UpdateAbnormalityPage() {
             <span className="material-symbols-outlined text-[#0063ff] text-lg">report_problem</span>
             Update Abnormality
           </h2>
-          <p className="text-[10px] text-gray-500">Laporkan kerusakan, keausan, atau ketidaknormalan pada Jig &amp; Fixture</p>
         </div>
+        {activeTab === 'form' && isPic && (
+          <button
+            type="submit"
+            form="abnormalityForm"
+            disabled={submitting}
+            className="py-1.5 px-4 bg-[#0063ff] text-white rounded-lg text-xs font-bold hover:bg-[#0052d4] transition-colors disabled:opacity-50 flex items-center gap-1.5 cursor-pointer shadow-sm"
+          >
+            {submitting ? (
+              <span className="material-symbols-outlined animate-spin text-sm">sync</span>
+            ) : (
+              <span className="material-symbols-outlined text-sm">send</span>
+            )}
+            {submitting ? 'Mengirim...' : 'Laporkan Abnormality'}
+          </button>
+        )}
       </header>
 
       {/* Tabs */}
@@ -209,55 +226,151 @@ export default function UpdateAbnormalityPage() {
 
       {/* Tab: Form */}
       {activeTab === 'form' && (
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-3 overflow-y-auto no-scrollbar max-w-xl pr-2 pb-6">
-          <div className="grid grid-cols-2 gap-3">
+        <form id="abnormalityForm" onSubmit={handleSubmit} className="flex-1 grid grid-cols-2 gap-5 overflow-hidden mt-2 pr-1 pb-2">
+          
+          {/* Left Column: Problem Definition */}
+          <div className="space-y-3.5 flex flex-col justify-start">
+            <h3 className="font-bold text-xs text-gray-800 border-b border-gray-150 pb-2 flex items-center gap-1.5 shrink-0">
+              <span className="material-symbols-outlined text-[#0063ff] text-sm">assignment_late</span>
+              Informasi Masalah
+            </h3>
+            
             {/* Item selector */}
-            <div className="col-span-2">
+            <div>
               <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Pilih Item Jig/Fixture *</label>
-              <select
-                value={selectedItemId}
-                onChange={(e) => setSelectedItemId(e.target.value)}
-                required
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700 font-medium"
-              >
-                <option value="">-- Pilih item --</option>
-                {items.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.noReg} — {item.assyPartName} [{item.lineProduct}]
-                  </option>
-                ))}
-              </select>
+              {(() => {
+                const selectedItem = items.find((item) => item.id === selectedItemId);
+                const filteredItems = items.filter((item) => {
+                  const query = itemSearchQuery.toLowerCase();
+                  return (
+                    item.noReg.toLowerCase().includes(query) ||
+                    item.assyPartName.toLowerCase().includes(query) ||
+                    item.lineProduct.toLowerCase().includes(query)
+                  );
+                });
+
+                return (
+                  <div className="relative">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="-- Cari berdasarkan No. Reg / Part Name / Line --"
+                        value={isItemDropdownOpen ? itemSearchQuery : (selectedItem ? `${selectedItem.noReg} — ${selectedItem.assyPartName} [${selectedItem.lineProduct}]` : '')}
+                        onChange={(e) => {
+                          setItemSearchQuery(e.target.value);
+                          if (!isItemDropdownOpen) setIsItemDropdownOpen(true);
+                        }}
+                        onFocus={() => {
+                          setIsItemDropdownOpen(true);
+                          setItemSearchQuery('');
+                        }}
+                        className="w-full border border-gray-300 rounded-lg pl-3 pr-12 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700 font-medium"
+                      />
+                      <input type="hidden" required value={selectedItemId} />
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                        {selectedItemId && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedItemId('');
+                              setItemSearchQuery('');
+                            }}
+                            className="text-gray-400 hover:text-gray-650 cursor-pointer flex"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">close</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setIsItemDropdownOpen(!isItemDropdownOpen)}
+                          className="text-gray-400 hover:text-gray-650 cursor-pointer flex"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">
+                            {isItemDropdownOpen ? 'expand_less' : 'expand_more'}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Dropdown Options */}
+                    {isItemDropdownOpen && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setIsItemDropdownOpen(false)}
+                        ></div>
+
+                        <ul className="absolute left-0 right-0 mt-1 max-h-40 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg z-50 text-xs no-scrollbar py-1">
+                          {filteredItems.length > 0 ? (
+                            filteredItems.map((item) => {
+                              const isSelected = item.id === selectedItemId;
+                              return (
+                                <li
+                                  key={item.id}
+                                  onClick={() => {
+                                    setSelectedItemId(item.id);
+                                    setIsItemDropdownOpen(false);
+                                    setItemSearchQuery('');
+                                  }}
+                                  className={`px-3 py-2 cursor-pointer transition-colors flex flex-col gap-0.5 ${
+                                    isSelected
+                                      ? 'bg-blue-50 text-blue-700 font-bold'
+                                      : 'text-gray-700 hover:bg-gray-50'
+                                  }`}
+                                >
+                                  <div className="flex justify-between items-center">
+                                    <span className="font-semibold text-gray-800">{item.noReg}</span>
+                                    <span className="text-[8px] uppercase font-bold bg-gray-150 text-gray-600 px-1.5 py-0.25 rounded font-mono">
+                                      {item.lineProduct}
+                                    </span>
+                                  </div>
+                                  <span className="text-[10px] text-gray-500 font-medium truncate">{item.assyPartName}</span>
+                                </li>
+                              );
+                            })
+                          ) : (
+                            <li className="px-3 py-2 text-gray-400 italic text-center">Item tidak ditemukan</li>
+                          )}
+                        </ul>
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
-            {/* Date Found */}
-            <div>
-              <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Tanggal Ditemukan *</label>
-              <input
-                type="date"
-                required
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700"
-                value={dateFound}
-                onChange={(e) => setDateFound(e.target.value)}
-              />
-            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Date Found */}
+              <div>
+                <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Tanggal Ditemukan *</label>
+                <input
+                  type="date"
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700"
+                  value={dateFound}
+                  onChange={(e) => setDateFound(e.target.value)}
+                />
+              </div>
 
-            {/* Found By */}
-            <div>
-              <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Ditemukan Oleh *</label>
-              <input
-                type="text"
-                placeholder="Nama pelapor..."
-                required
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700"
-                value={foundBy}
-                onChange={(e) => setFoundBy(e.target.value)}
-              />
+              {/* Found By */}
+              <div>
+                <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Ditemukan Oleh *</label>
+                <input
+                  type="text"
+                  placeholder="Nama pelapor..."
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700"
+                  value={foundBy}
+                  onChange={(e) => setFoundBy(e.target.value)}
+                />
+              </div>
             </div>
 
             {/* Type */}
-            <div className="col-span-2">
+            <div>
               <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Tipe Abnormality</label>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-1.5 flex-wrap">
                 {ABNORMALITY_TYPES.map((t) => (
                   <button
                     key={t}
@@ -272,156 +385,153 @@ export default function UpdateAbnormalityPage() {
             </div>
 
             {/* Description */}
-            <div className="col-span-2">
+            <div className="flex-1 flex flex-col min-h-0">
               <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Problem Description (Deskripsi Masalah) *</label>
               <textarea
                 placeholder="Detail gejala abnormal..."
                 required
-                rows={2}
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none resize-none text-gray-700"
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none resize-none text-gray-700 min-h-[90px]"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
+          </div>
+
+          {/* Right Column: Actions & Root Causes */}
+          <div className="space-y-3.5 flex flex-col justify-start">
+            <h3 className="font-bold text-xs text-gray-800 border-b border-gray-150 pb-2 flex items-center gap-1.5 shrink-0">
+              <span className="material-symbols-outlined text-[#0063ff] text-sm">build</span>
+              Analisa & Tindakan
+            </h3>
 
             {/* Root Cause */}
-            <div className="col-span-2">
-              <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Root Cause (Penyebab Dasar)</label>
+            <div>
+              <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Root Cause (Penyebab Akar)</label>
               <textarea
                 placeholder="Penyebab akar dari masalah..."
-                rows={2}
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none resize-none text-gray-700"
+                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none resize-none text-gray-700 h-[56px]"
                 value={rootCause}
                 onChange={(e) => setRootCause(e.target.value)}
               />
             </div>
 
-            {/* Temporary Action */}
-            <div>
-              <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Temporary Action (Tindakan Sementara)</label>
-              <textarea
-                placeholder="Solusi sementara..."
-                rows={2}
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none resize-none text-gray-700"
-                value={tempAction}
-                onChange={(e) => setTempAction(e.target.value)}
-              />
-            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Temporary Action */}
+              <div>
+                <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Temporary Action (Sementara)</label>
+                <textarea
+                  placeholder="Solusi sementara..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none resize-none text-gray-700 h-[56px]"
+                  value={tempAction}
+                  onChange={(e) => setTempAction(e.target.value)}
+                />
+              </div>
 
-            {/* Corrective Action */}
-            <div>
-              <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Corrective Action (Tindakan Korektif)</label>
-              <textarea
-                placeholder="Solusi jangka panjang..."
-                rows={2}
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none resize-none text-gray-700"
-                value={correctiveAction}
-                onChange={(e) => setCorrectiveAction(e.target.value)}
-              />
-            </div>
-
-            {/* Action PIC */}
-            <div>
-              <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Action PIC (Person In Charge)</label>
-              <input
-                type="text"
-                placeholder="Nama PIC Tindakan..."
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700"
-                value={actionPic}
-                onChange={(e) => setActionPic(e.target.value)}
-              />
-            </div>
-
-            {/* Initial Status */}
-            <div>
-              <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Status Laporan</label>
-              <select
-                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700 font-bold"
-                value={status}
-                onChange={(e) => setStatus(e.target.value as any)}
-              >
-                <option value="OPEN">Open</option>
-                <option value="MONITORING">Monitoring</option>
-                <option value="CLOSED">Closed</option>
-              </select>
-            </div>
-
-            {/* Link to Revision */}
-            <div className="flex flex-col justify-center border border-gray-200 rounded-xl p-2.5 bg-gray-50">
-              <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Link to Revision?</label>
-              <div className="flex gap-3 text-xs">
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="linkToRevision"
-                    checked={linkToRevision === true}
-                    onChange={() => setLinkToRevision(true)}
-                  />
-                  <span>Ya</span>
-                </label>
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="linkToRevision"
-                    checked={linkToRevision === false}
-                    onChange={() => setLinkToRevision(false)}
-                  />
-                  <span>Tidak</span>
-                </label>
+              {/* Corrective Action */}
+              <div>
+                <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Corrective Action (Permanen)</label>
+                <textarea
+                  placeholder="Solusi jangka panjang..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none resize-none text-gray-700 h-[56px]"
+                  value={correctiveAction}
+                  onChange={(e) => setCorrectiveAction(e.target.value)}
+                />
               </div>
             </div>
 
-            {/* Link to Spare Replacement */}
-            <div className="flex flex-col justify-center border border-gray-200 rounded-xl p-2.5 bg-gray-50">
-              <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Link to Spare Replacement?</label>
-              <div className="flex gap-3 text-xs">
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="linkToSpare"
-                    checked={linkToSpare === true}
-                    onChange={() => setLinkToSpare(true)}
-                  />
-                  <span>Ya</span>
-                </label>
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="linkToSpare"
-                    checked={linkToSpare === false}
-                    onChange={() => setLinkToSpare(false)}
-                  />
-                  <span>Tidak</span>
-                </label>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Action PIC */}
+              <div>
+                <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Action PIC</label>
+                <input
+                  type="text"
+                  placeholder="Nama PIC Tindakan..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700"
+                  value={actionPic}
+                  onChange={(e) => setActionPic(e.target.value)}
+                />
+              </div>
+
+              {/* Initial Status */}
+              <div>
+                <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Status Laporan</label>
+                <select
+                  className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700 font-bold"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as any)}
+                >
+                  <option value="OPEN">Open</option>
+                  <option value="MONITORING">Monitoring</option>
+                  <option value="CLOSED">Closed</option>
+                </select>
               </div>
             </div>
-          </div>
 
-          {/* Warning info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-[9px] text-[#0063ff] flex items-start gap-1.5">
-            <span className="material-symbols-outlined text-[12px] mt-0.5">warning</span>
-            <span>Submit akan otomatis mengirimkan <strong>notifikasi darurat</strong> ke Section Head &amp; Dept Head untuk segera ditindaklanjuti.</span>
-          </div>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Link to Revision */}
+              <div className="flex flex-col justify-center border border-gray-200 rounded-xl p-2.5 bg-gray-50">
+                <label className="block text-[8px] font-bold text-gray-500 uppercase mb-0.5">Link to Revision?</label>
+                <div className="flex gap-3 text-xs">
+                  <label className="flex items-center gap-1 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="linkToRevision"
+                      checked={linkToRevision === true}
+                      onChange={() => setLinkToRevision(true)}
+                    />
+                    <span>Ya</span>
+                  </label>
+                  <label className="flex items-center gap-1 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="linkToRevision"
+                      checked={linkToRevision === false}
+                      onChange={() => setLinkToRevision(false)}
+                    />
+                    <span>Tidak</span>
+                  </label>
+                </div>
+              </div>
 
-          <button
-            type="submit"
-            disabled={submitting || !isPic}
-            className="w-fit py-2 px-6 bg-[#0063ff] text-white rounded-lg text-xs font-bold hover:bg-[#0052d4] transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
-          >
-            {submitting ? (
-              <span className="material-symbols-outlined animate-spin text-sm">sync</span>
-            ) : (
-              <span className="material-symbols-outlined text-sm">send</span>
+              {/* Link to Spare Replacement */}
+              <div className="flex flex-col justify-center border border-gray-200 rounded-xl p-2.5 bg-gray-50">
+                <label className="block text-[8px] font-bold text-gray-500 uppercase mb-0.5">Link to Spare?</label>
+                <div className="flex gap-3 text-xs">
+                  <label className="flex items-center gap-1 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="linkToSpare"
+                      checked={linkToSpare === true}
+                      onChange={() => setLinkToSpare(true)}
+                    />
+                    <span>Ya</span>
+                  </label>
+                  <label className="flex items-center gap-1 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="linkToSpare"
+                      checked={linkToSpare === false}
+                      onChange={() => setLinkToSpare(false)}
+                    />
+                    <span>Tidak</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Alert info banner */}
+            <div className="bg-orange-50 border border-orange-200 text-orange-850 text-[9px] p-2 rounded-lg flex items-start gap-1 font-medium leading-tight">
+              <span className="material-symbols-outlined text-[12px] mt-0.5">warning</span>
+              <span>Submit akan otomatis mengirimkan <strong>notifikasi darurat</strong> ke Section Head & Dept Head.</span>
+            </div>
+            
+            {!isPic && (
+              <p className="text-[9px] text-red-500 flex items-center gap-1">
+                <span className="material-symbols-outlined text-[11px]">lock</span>
+                Hanya PIC Jig Fixture yang dapat membuat laporan.
+              </p>
             )}
-            {submitting ? 'Mengirim...' : 'Laporkan Abnormality'}
-          </button>
-
-          {!isPic && (
-            <p className="text-[9px] text-red-500 flex items-center gap-1">
-              <span className="material-symbols-outlined text-[11px]">lock</span>
-              Hanya PIC Jig Fixture yang dapat membuat laporan.
-            </p>
-          )}
+          </div>
         </form>
       )}
 

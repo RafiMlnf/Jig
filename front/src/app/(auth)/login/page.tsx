@@ -94,7 +94,7 @@ export default function LoginPage() {
               >
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-sm text-green-600">person</span>
-                  <span className="text-[10px] font-bold text-gray-800 group-hover:text-blue-600 transition-colors">Admin (PIC)</span>
+                  <span className="text-[10px] font-bold text-gray-800 group-hover:text-blue-600 transition-colors">PIC</span>
                 </div>
                 <p className="text-[8px] text-gray-500 mt-1">admin / admin123</p>
               </div>
@@ -130,7 +130,7 @@ export default function LoginPage() {
               >
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-sm text-gray-500">visibility</span>
-                  <span className="text-[10px] font-bold text-gray-800 group-hover:text-blue-600 transition-colors">Guest (Visitor)</span>
+                  <span className="text-[10px] font-bold text-gray-800 group-hover:text-blue-600 transition-colors">Guest</span>
                 </div>
                 <p className="text-[8px] text-gray-500 mt-1">guest@example.com</p>
               </div>

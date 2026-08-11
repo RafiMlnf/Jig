@@ -79,7 +79,7 @@ export default function EditInventoryPage({ params }: PageProps) {
     updateItemStock(item.id, minStock, actStock, lifecycleStatus);
     setToastMessage('Inventory saved successfully!');
     setShowRedAlert(false);
-    
+
     // Auto redirect after a short delay
     setTimeout(() => {
       router.push('/inventory');
@@ -87,68 +87,66 @@ export default function EditInventoryPage({ params }: PageProps) {
   };
 
   return (
-    <div className="flex-1 flex flex-col p-4 bg-white h-full overflow-hidden relative">
+    <div className="flex-1 flex flex-col p-5 bg-white h-full overflow-hidden relative">
       {/* Toast Alert */}
       {toastMessage && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-lg z-50 transition-opacity duration-300">
+        <div className="absolute top-5 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-lg z-50 transition-opacity duration-300">
           {toastMessage}
         </div>
       )}
 
       {/* Header */}
-      <header className="flex justify-between items-center pb-3 mb-3 border-b border-gray-150">
-        <div className="flex items-center gap-2">
+      <header className="flex justify-between items-center pb-4 mb-4 border-b border-gray-200">
+        <div className="flex items-center gap-2.5">
           <Link href="/inventory" className="text-gray-500 hover:text-gray-800 flex items-center">
-            <span className="material-symbols-outlined text-base font-bold">arrow_back</span>
+            <span className="material-symbols-outlined text-lg font-bold">arrow_back</span>
           </Link>
           <div>
-            <h2 className="text-sm font-bold text-gray-800">Edit Inventory Item</h2>
-            <p className="text-[9px] text-gray-500">Modify stock specifications for {item.noReg}</p>
+            <h2 className="text-base font-bold text-gray-805">Edit Inventory Item</h2>
+            <p className="text-xs text-gray-500">Modify stock specifications for {item.noReg}</p>
           </div>
         </div>
-        <span className="text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold uppercase">
+        <span className="text-[10px] bg-blue-100 text-blue-700 px-2.5 py-1 rounded-md font-bold uppercase tracking-wider">
           Fase 1 Flow
         </span>
       </header>
 
       {/* Main Form Content Split */}
-      <div className="flex-1 flex gap-4 min-h-0">
-        
+      <div className="flex-1 flex gap-5 min-h-0">
+
         {/* Left Side: 3D CAD Mockup */}
-        <div className="w-1/2 bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 flex flex-col justify-between overflow-hidden relative">
-          <div className="flex justify-between items-center mb-2 z-10">
-            <span className="text-[8px] bg-gray-900 text-white font-bold px-2 py-0.5 rounded uppercase flex items-center gap-1">
-              <span className="material-symbols-outlined text-[10px] text-primary">view_in_ar</span>
+        <div className="w-1/2 bg-surface-container-low border border-outline-variant/30 rounded-xl p-4 flex flex-col justify-between overflow-hidden relative">
+          <div className="flex justify-between items-center mb-3 z-10">
+            <span className="text-[9px] bg-gray-900 text-white font-bold px-2.5 py-1 rounded uppercase flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[12px] text-primary">view_in_ar</span>
               3D CAD Render
             </span>
-            <span className="text-[8px] text-on-surface-variant font-semibold">
+            <span className="text-[10px] text-on-surface-variant font-bold">
               Rev Status: {item.revStatus}
             </span>
           </div>
 
           {/* Render Mock Drawing */}
-          <div className="flex-1 rounded-lg bg-surface flex items-center justify-center relative overflow-hidden mb-3 border border-outline-variant/20 shadow-inner group">
-            {/* Display Unsplash Image Mockup for 3D model */}
-            <img 
-              src={item.newVisualDesign || "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=300&q=80"} 
-              alt="3D CAD drawing" 
-              className="object-cover w-full h-full opacity-60 mix-blend-luminosity group-hover:scale-105 transition-transform duration-500" 
+          <div className="flex-1 rounded-xl bg-surface flex items-center justify-center relative overflow-hidden mb-4 border border-outline-variant/20 shadow-inner group">
+            <img
+              src={item.newVisualDesign || "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&q=80"}
+              alt="3D CAD drawing"
+              className="object-cover w-full h-full opacity-60 mix-blend-luminosity group-hover:scale-105 transition-transform duration-500"
             />
-            {/* Visual grid overlay for premium engineering feel */}
             <div className="absolute inset-0 bg-pattern-lines opacity-10 mix-blend-overlay"></div>
-            <div className="absolute bottom-2 left-2 right-2 bg-black/60 backdrop-blur-sm rounded p-1.5 border border-white/10">
-              <p className="text-[8px] text-gray-300 leading-none mb-0.5">Assy Part Name</p>
-              <p className="text-[10px] font-bold text-white truncate leading-none">{item.assyPartName}</p>
+            <div className="absolute bottom-3 left-3 right-3 bg-black/75 backdrop-blur-sm rounded-lg p-3 border border-white/10">
+              <p className="text-[9.5px] text-gray-400 font-semibold leading-none mb-1">Assy Part Name</p>
+              <p className="text-xs font-bold text-white truncate leading-none">{item.assyPartName}</p>
             </div>
           </div>
 
-          <div className="text-[9px] text-on-surface-variant grid grid-cols-2 gap-1 bg-surface/50 border border-outline-variant/10 rounded-lg p-2">
+          <div className="text-xs text-on-surface-variant grid grid-cols-2 gap-3 bg-surface/50 border border-outline-variant/10 rounded-xl p-3">
             <div>
-              <span className="block font-medium">Line Product:</span>
+              <span className="block text-[9.5px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Line Product:</span>
               <span className="text-on-surface font-bold truncate block">{item.lineProduct}</span>
             </div>
             <div>
-              <span className="block font-medium">Process:</span>
+              <span className="block text-[9.5px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Process:</span>
               <span className="text-on-surface font-bold truncate block">{item.process}</span>
             </div>
           </div>
@@ -156,62 +154,59 @@ export default function EditInventoryPage({ params }: PageProps) {
 
         {/* Right Side: Stock Input Form */}
         <div className="w-1/2 flex flex-col gap-3">
-          <form onSubmit={handleSave} className="flex-1 flex flex-col justify-between border border-gray-200 rounded-xl p-3 bg-gray-50">
-            
-            <div className="space-y-3">
-              <h3 className="font-bold text-xs text-gray-800 border-b border-gray-200 pb-1.5 flex items-center gap-1">
-                <span className="material-symbols-outlined text-sm">settings_input_composite</span>
+          <form onSubmit={handleSave} className="flex-1 flex flex-col justify-between border border-gray-300 rounded-xl p-4 bg-gray-50">
+
+            <div className="space-y-4">
+              <h3 className="font-bold text-sm text-gray-805 border-b border-gray-300 pb-2 flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-base">settings_input_composite</span>
                 Stock Parameters
               </h3>
-              
+
               {!isPic && (
-                <div className="bg-yellow-50 border border-yellow-250 text-yellow-800 text-[9px] p-2 rounded-lg mb-1 flex items-center gap-1.5 font-medium">
-                  <span className="material-symbols-outlined text-[12px]">lock</span>
-                  <span>View Only: You must be a PIC Jigs (PE_JIG_FIXTURE) to edit stock parameters.</span>
+                <div className="bg-yellow-50 border border-yellow-250 text-yellow-800 text-[10.5px] p-2.5 rounded-lg mb-2 flex items-center gap-1.5 font-bold">
+                  <span className="material-symbols-outlined text-[13px]">lock</span>
+                  <span>View Only: Hubungi PIC Jigs (PE_JIG_FIXTURE) untuk mengubah stock.</span>
                 </div>
               )}
-
               {/* Min Stock input */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[9px] font-bold text-gray-500 uppercase">Minimum Stock limit</label>
-                <div className={`flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-primary ${isPic ? 'bg-white' : 'bg-gray-100'}`}>
-                  <span className="material-symbols-outlined text-gray-400 text-sm px-2">vertical_align_bottom</span>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Minimum Stock limit</label>
+                <div className={`flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-primary focus-within:border-primary ${isPic ? 'bg-white' : 'bg-gray-100'}`}>
+                  <span className="material-symbols-outlined text-gray-400 text-lg px-3">vertical_align_bottom</span>
                   <input
                     type="number"
-                    className="flex-1 py-1 px-1 text-xs border-none outline-none focus:ring-0 text-gray-700 font-bold disabled:opacity-75"
+                    className="flex-1 py-3 px-2 text-sm border-none outline-none focus:ring-0 text-gray-805 font-bold disabled:opacity-75"
                     min="0"
                     value={minStock}
                     onChange={(e) => setMinStock(parseInt(e.target.value) || 0)}
                     disabled={!isPic}
                   />
                 </div>
-                <p className="text-[8px] text-gray-400">Trigger warnings when actual stock falls below this level.</p>
               </div>
 
               {/* Actual Stock input */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[9px] font-bold text-gray-500 uppercase">Actual Stock quantity</label>
-                <div className={`flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-primary ${isPic ? 'bg-white' : 'bg-gray-100'}`}>
-                  <span className="material-symbols-outlined text-gray-400 text-sm px-2">inventory</span>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Actual Stock quantity</label>
+                <div className={`flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-primary focus-within:border-primary ${isPic ? 'bg-white' : 'bg-gray-100'}`}>
+                  <span className="material-symbols-outlined text-gray-400 text-lg px-3">inventory</span>
                   <input
                     type="number"
-                    className="flex-1 py-1 px-1 text-xs border-none outline-none focus:ring-0 text-gray-700 font-bold disabled:opacity-75"
+                    className="flex-1 py-3 px-2 text-sm border-none outline-none focus:ring-0 text-gray-805 font-bold disabled:opacity-75"
                     min="0"
                     value={actStock}
                     onChange={(e) => setActStock(parseInt(e.target.value) || 0)}
                     disabled={!isPic}
                   />
                 </div>
-                <p className="text-[8px] text-gray-400">Physical count currently available in inventory room.</p>
               </div>
 
               {/* Lifecycle Status input */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[9px] font-bold text-gray-500 uppercase">Lifecycle Status</label>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Lifecycle Status</label>
                 <div className={`flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-primary bg-white`}>
-                  <span className="material-symbols-outlined text-gray-400 text-sm px-2">hourglass_empty</span>
+                  <span className="material-symbols-outlined text-gray-400 text-lg px-3">hourglass_empty</span>
                   <select
-                    className="flex-1 py-1 px-1 text-xs border-none outline-none focus:ring-0 text-gray-700 font-bold bg-white"
+                    className="flex-1 py-3 px-2 text-sm border-none outline-none focus:ring-0 text-gray-805 font-bold bg-white"
                     value={lifecycleStatus}
                     onChange={(e) => setLifecycleStatus(e.target.value)}
                     disabled={!isPic}
@@ -227,28 +222,28 @@ export default function EditInventoryPage({ params }: PageProps) {
             </div>
 
             {/* Realtime indicator Preview Badge */}
-            <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-inner my-2 flex justify-between items-center">
+            <div className="bg-white border border-gray-300 rounded-xl p-3.5 shadow-inner my-3 flex justify-between items-center">
               <div>
-                <h4 className="text-[8px] font-bold text-gray-400 uppercase">Realtime Preview</h4>
-                <p className="text-[10px] font-semibold text-gray-700">Stock Indicator</p>
+                <h4 className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Realtime Preview</h4>
+                <p className="text-xs font-bold text-gray-700">Stock Status Indicator</p>
               </div>
-              <span className={`text-[9px] font-bold px-3 py-1 rounded-full ${indicatorColor}`}>
+              <span className={`text-[11px] font-extrabold px-3.5 py-1.5 rounded-full ${indicatorColor}`}>
                 {indicatorText}
               </span>
             </div>
 
             {/* Form actions */}
-            <div className="flex gap-2">
-              <Link 
+            <div className="flex gap-2.5">
+              <Link
                 href="/inventory"
-                className="flex-1 py-1.5 border border-gray-300 text-gray-600 rounded-lg text-xs font-bold hover:bg-gray-100 transition-colors text-center cursor-pointer"
+                className="flex-1 py-2.5 border border-gray-300 text-gray-600 rounded-lg text-sm font-bold hover:bg-gray-150 transition-colors text-center cursor-pointer"
               >
                 {isPic ? 'Cancel' : 'Back to Inventory'}
               </Link>
               {isPic && (
                 <button
                   type="submit"
-                  className="flex-1 py-1.5 bg-[#0063ff] text-white rounded-lg text-xs font-bold hover:bg-[#0052d4] transition-colors cursor-pointer"
+                  className="flex-1 py-2.5 bg-[#0063ff] text-white rounded-lg text-sm font-bold hover:bg-[#0052d4] transition-colors cursor-pointer"
                 >
                   Save Stock
                 </button>
@@ -269,19 +264,19 @@ export default function EditInventoryPage({ params }: PageProps) {
               <span className="material-symbols-outlined text-red-500 text-xl font-bold z-10">error</span>
             </div>
             <h3 className="text-center font-bold text-sm text-red-500 mb-1">CRITICAL STOK 0 DETECTED!</h3>
-            <p className="text-center text-[9px] text-on-surface-variant mb-4 leading-relaxed">
+            <p className="text-center text-[9.5px] text-on-surface-variant mb-4 leading-relaxed">
               Saving actual stock as <strong>0</strong> will trigger a high-priority system-wide <strong>Red Alert banner</strong> and broadcast push notifications to the Section Head and Department Head.
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-2.5">
               <button
                 onClick={() => setShowRedAlert(false)}
-                className="flex-1 py-1 border border-outline/30 rounded-lg text-[10px] font-bold hover:bg-surface-container-highest transition-colors cursor-pointer"
+                className="flex-1 py-1.5 border border-outline/30 rounded-lg text-[10px] font-bold hover:bg-surface-container-highest transition-colors cursor-pointer"
               >
                 Go Back
               </button>
               <button
                 onClick={executeSave}
-                className="flex-1 py-1 bg-red-500 text-white rounded-lg text-[10px] font-bold hover:bg-red-600 transition-colors cursor-pointer"
+                className="flex-1 py-1.5 bg-red-500 text-white rounded-lg text-[10px] font-bold hover:bg-red-650 transition-colors cursor-pointer"
               >
                 Proceed & Alert
               </button>

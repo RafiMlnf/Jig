@@ -28,9 +28,21 @@
   --color-accent-green: #a8f3aa;
   --color-accent-pink: #ffaec6;
 
+  /* Global Gray Override for Darker Borders/Strokes */
+  --color-gray-150: #d8dbe2;
+  --color-gray-200: #c2c6cf;
+  --color-gray-300: #9ba1ad;
+  --color-gray-400: #7e8492;
+
   /* Google Sans as universal app font */
   --font-sans: 'Google Sans', 'Roboto', sans-serif;
   --font-mono: 'Google Sans Mono', 'Google Sans', monospace;
+
+  /* Consistent border-radius system for all cards and buttons */
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
 }
 
 @utility no-scrollbar {

@@ -95,16 +95,16 @@ export default function InventoryPage() {
           onClick={() => setStatusFilter(statusFilter === 'GREEN' ? 'All' : 'GREEN')}
           className={`flex-1 rounded-xl px-3 py-1.5 flex items-center gap-3 shadow-sm border cursor-pointer transition-all ${statusFilter === 'GREEN'
             ? 'bg-green-500/10 border-green-500'
-            : 'bg-surface border-outline-variant/30 hover:border-green-500/30'
+            : 'bg-white border-gray-200 hover:border-green-500/30'
             }`}
         >
           <div className="w-7 h-7 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
             <span className="material-symbols-outlined text-green-500 text-base">check_circle</span>
           </div>
           <div>
-            <p className="text-[9px] text-on-surface-variant leading-none mb-0.5">Aman (Green)</p>
-            <h3 className="text-base font-bold text-on-surface leading-none">
-              {greenItems} <span className="text-[9px] font-normal text-on-surface-variant">Items</span>
+            <p className="text-[9px] text-gray-500 leading-none mb-0.5">Aman (Green)</p>
+            <h3 className="text-base font-bold text-gray-800 leading-none">
+              {greenItems} <span className="text-[9px] font-normal text-gray-500">Items</span>
             </h3>
           </div>
         </div>
@@ -114,16 +114,16 @@ export default function InventoryPage() {
           onClick={() => setStatusFilter(statusFilter === 'YELLOW' ? 'All' : 'YELLOW')}
           className={`flex-1 rounded-xl px-3 py-1.5 flex items-center gap-3 shadow-sm border cursor-pointer transition-all ${statusFilter === 'YELLOW'
             ? 'bg-yellow-500/10 border-yellow-500'
-            : 'bg-surface border-outline-variant/30 hover:border-yellow-500/30'
+            : 'bg-white border-gray-200 hover:border-yellow-500/30'
             }`}
         >
           <div className="w-7 h-7 rounded-full bg-yellow-500/20 flex items-center justify-center shrink-0">
             <span className="material-symbols-outlined text-yellow-500 text-base">warning</span>
           </div>
           <div>
-            <p className="text-[9px] text-on-surface-variant leading-none mb-0.5">Warning (Yellow)</p>
-            <h3 className="text-base font-bold text-on-surface leading-none">
-              {yellowItems} <span className="text-[9px] font-normal text-on-surface-variant">Items</span>
+            <p className="text-[9px] text-gray-500 leading-none mb-0.5">Warning (Yellow)</p>
+            <h3 className="text-base font-bold text-gray-800 leading-none">
+              {yellowItems} <span className="text-[9px] font-normal text-gray-500">Items</span>
             </h3>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function InventoryPage() {
           onClick={() => setStatusFilter(statusFilter === 'RED' ? 'All' : 'RED')}
           className={`flex-1 rounded-xl px-3 py-1.5 flex items-center gap-3 shadow-sm border cursor-pointer transition-all relative overflow-hidden ${statusFilter === 'RED'
             ? 'bg-red-500/10 border-red-500'
-            : 'bg-surface border-outline-variant/30 hover:border-red-500/30'
+            : 'bg-white border-gray-200 hover:border-red-500/30'
             }`}
         >
           {redItems > 0 && <div className="absolute inset-0 bg-red-500/5 animate-pulse"></div>}
@@ -141,9 +141,9 @@ export default function InventoryPage() {
             <span className="material-symbols-outlined text-white text-base">error</span>
           </div>
           <div className="z-10">
-            <p className="text-[9px] text-on-surface-variant leading-none mb-0.5">Critical/Stok 0</p>
-            <h3 className="text-base font-bold text-on-surface leading-none">
-              {redItems} <span className="text-[9px] font-normal text-on-surface-variant">Items</span>
+            <p className="text-[9px] text-gray-500 leading-none mb-0.5">Critical/Stok 0</p>
+            <h3 className="text-base font-bold text-gray-800 leading-none">
+              {redItems} <span className="text-[9px] font-normal text-gray-500">Items</span>
             </h3>
           </div>
         </div>

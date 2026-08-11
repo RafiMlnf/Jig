@@ -163,7 +163,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Fallback/offline login for testing without backend
       console.warn('Backend login endpoint unavailable. Attempting offline fallback verification.');
       if (email === 'admin' && password === 'admin123') {
-        const fallbackUser: AuthUser = { id: 'offline-admin', email: 'admin', name: 'Admin (PIC)', role: 'PE_JIG_FIXTURE' };
+        const fallbackUser: AuthUser = { id: 'offline-admin', email: 'admin', name: 'PIC', role: 'PE_JIG_FIXTURE' };
         const mockToken = 'offline-jwt-token-for-admin';
 
         Cookies.set('auth_token', mockToken, { expires: 1 });
@@ -177,10 +177,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setApprovals(fetchedApprovals);
       } else if (password === 'password') {
         let role: 'PE_JIG_FIXTURE' | 'PE_SECTION_HEAD' | 'PE_DEPT_HEAD' | 'TAMU' = 'TAMU';
-        let name = 'Tamu Visitor';
+        let name = 'Guest';
         if (email.includes('pic')) {
           role = 'PE_JIG_FIXTURE';
-          name = 'Admin (PIC)';
+          name = 'PIC';
         } else if (email.includes('sec')) {
           role = 'PE_SECTION_HEAD';
           name = 'M. Fariedl (Section Head)';

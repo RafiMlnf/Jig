@@ -116,7 +116,7 @@ export default function Sidebar() {
       </svg>
 
       {/* Header */}
-      <div className="p-4 py-5 border-b border-outline-variant h-[68px] flex flex-col justify-center overflow-hidden">
+      <div className="p-4 py-5 border-b border-outline-variant h-[80px] flex flex-col justify-center overflow-hidden">
         <div className="relative w-full h-[32px] flex items-center justify-start px-2">
           {/* Logo Text */}
           <div
@@ -185,16 +185,6 @@ export default function Sidebar() {
                 </li>
               );
             })}
-
-            {/* Guest: show view-only notice */}
-            {role === 'TAMU' && (
-              <li className="mx-3 mt-2 px-2 py-1.5 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-[9px] text-yellow-700 font-semibold flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[11px]">visibility</span>
-                  Mode baca saja (View Only)
-                </p>
-              </li>
-            )}
           </ul>
         )}
       </nav>
@@ -202,10 +192,13 @@ export default function Sidebar() {
       {/* Footer Container */}
       <div className="p-3 border-t border-outline-variant mt-auto flex flex-col gap-2 relative">
         {showSubmitBtn && (
-          <button className="w-full py-1.5 px-3 rounded-lg bg-[#0063ff] text-white font-bold text-xs hover:bg-[#0052d4] transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+          <Link
+            href="/design?action=revision"
+            className="w-full py-1.5 px-3 rounded-lg bg-[#0063ff] text-white font-bold text-xs hover:bg-[#0052d4] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+          >
             <span className="material-symbols-outlined text-sm">add</span>
             Submit Revision
-          </button>
+          </Link>
         )}
 
 

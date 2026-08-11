@@ -42,7 +42,7 @@ async function main() {
   const users = [
     {
       email: 'admin',
-      name: 'Admin (PIC)',
+      name: 'PIC',
       npk: 'NPK001',
       roleId: rolesMap['PE_JIG_FIXTURE'],
       password: adminPasswordHash,
@@ -63,7 +63,7 @@ async function main() {
     },
     {
       email: 'guest@example.com',
-      name: 'Tamu (Visitor)',
+      name: 'Guest',
       npk: 'NPK004',
       roleId: rolesMap['TAMU'],
       password: passwordHash,

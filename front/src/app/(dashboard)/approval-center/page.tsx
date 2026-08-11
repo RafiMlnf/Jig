@@ -44,7 +44,6 @@ export default function ApprovalCenterPage() {
             <span className="material-symbols-outlined text-[#0063ff] text-lg">fact_check</span>
             Approval Center
           </h2>
-          <p className="text-[10px] text-gray-500">Multistage approval gatekeeper for design revisions & critical stock updates</p>
         </div>
 
         {/* Toggle Filters */}
@@ -107,22 +106,50 @@ export default function ApprovalCenterPage() {
 
                 <div className="pl-2 grid grid-cols-2 gap-4">
                   {/* Left Column: Info */}
-                  <div className="flex flex-col justify-between pr-2">
+                  <div className="flex flex-col justify-center pr-2 gap-3">
                     <div>
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] bg-gray-100 text-gray-600 font-bold px-2 py-0.5 rounded font-mono">
-                          {app.noReg}
-                        </span>
-                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${statusBadgeColor}`}>
-                          {app.status}
-                        </span>
+                      <div className="flex justify-between items-center mb-2 gap-2">
+                        <h3 className="text-sm font-bold text-gray-800 leading-tight">
+                          {app.itemName}
+                        </h3>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {isApproved && (
+                            <div className="flex items-center gap-1 text-green-700">
+                              <span className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center shadow-2xs">
+                                <span className="material-symbols-outlined text-[13px] font-black leading-none">check</span>
+                              </span>
+                              <span className="text-[9px] font-extrabold uppercase tracking-wide leading-none">Approved</span>
+                            </div>
+                          )}
+                          {isWaiting && (
+                            <div className="flex items-center gap-1 text-yellow-605">
+                              <span className="w-6 h-6 rounded-full bg-yellow-500 text-white flex items-center justify-center shadow-2xs">
+                                <span className="material-symbols-outlined text-[13px] font-black leading-none">more_horiz</span>
+                              </span>
+                              <span className="text-[9px] font-extrabold uppercase tracking-wide leading-none">Waiting</span>
+                            </div>
+                          )}
+                          {isRejected && (
+                            <div className="flex items-center gap-1 text-red-700">
+                              <span className="w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center shadow-2xs">
+                                <span className="material-symbols-outlined text-[13px] font-black leading-none">close</span>
+                              </span>
+                              <span className="text-[9px] font-extrabold uppercase tracking-wide leading-none">Rejected</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
-                      <h3 className="text-sm font-bold text-gray-800 leading-tight mb-1">
-                        {app.itemName}
-                      </h3>
-                      <div className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-wider">
-                        Tipe: {app.type}
+                      <div className="flex flex-col gap-1 mt-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">No. Reg:</span>
+                          <span className="text-[10px] bg-gray-100 text-gray-700 font-bold px-2 py-0.5 rounded font-mono">
+                            {app.noReg}
+                          </span>
+                        </div>
+                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                          Tipe: {app.type}
+                        </div>
                       </div>
                     </div>
 

@@ -122,6 +122,8 @@ export class DesignService {
         leadTime: dto.leadTime ? parseInt(String(dto.leadTime)) : undefined,
         loc3D: dto.docLocation3D || undefined,
         path3D: dto.docLocation3D || undefined,
+        loc2D: dto.docLocation2D || undefined,
+        path2D: dto.docLocation2D || undefined,
       },
     });
 
@@ -198,6 +200,10 @@ export class DesignService {
         createdAt: rev.createdAt,
         vendorName: rev.vendor?.name || 'N/A',
         changedBy: rev.changedBy.name,
+        path2D: rev.path2D,
+        loc2D: rev.loc2D,
+        path3D: rev.path3D,
+        loc3D: rev.loc3D,
       })),
       abnormalities: d.abnormalities.map((abn) => ({
         id: abn.id,
@@ -310,7 +316,9 @@ export class DesignService {
         leadTime: dto.leadTime ? parseInt(String(dto.leadTime), 10) : undefined,
         loc3D: dto.docLocation3D || undefined,
         path3D: dto.docLocation3D || undefined,
-        approvedByName: 'System Admin (PIC)',
+        loc2D: dto.docLocation2D || undefined,
+        path2D: dto.docLocation2D || undefined,
+        approvedByName: 'System PIC',
       },
     });
 

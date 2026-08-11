@@ -16,7 +16,7 @@ export default function RightPanel() {
     if (role === 'PE_JIG_FIXTURE') return 'PIC Jig Fixture';
     if (role === 'PE_SECTION_HEAD') return 'Section Head';
     if (role === 'PE_DEPT_HEAD') return 'Dept Head';
-    return 'Guest Visitor';
+    return 'Guest';
   };
 
   const getInitials = (name: string) => {
@@ -185,7 +185,7 @@ export default function RightPanel() {
             <div className="absolute right-full top-1/2 -translate-y-1/2 mr-3 px-2.5 py-1 bg-gray-900 text-white text-[9px] font-bold rounded opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap flex flex-col gap-0.5 shadow-lg z-30">
               <div className="flex items-center gap-1 text-[10px]">
                 <span className="material-symbols-outlined text-[11px] text-primary">badge</span>
-                <span>{user ? getRoleLabel(user.role) : 'Visitor'}</span>
+                <span>{user ? getRoleLabel(user.role) : 'Guest'}</span>
               </div>
               <span className="text-[8px] text-gray-400 font-normal leading-none">{user?.name || 'Guest'}</span>
               {/* Tooltip triangle */}

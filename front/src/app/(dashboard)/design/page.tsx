@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { fetchMasterList, fetchVendors, fetchLinesAndProcesses, createDesignItem, submitDesignUpdate, fetchDashboardAlerts, uploadFile, getFileUrl } from '@/lib/api/phase3';
 import { canEdit } from '@/lib/rbac';
@@ -176,8 +176,10 @@ function getUniqueOptions(opts: Array<{ id: string; name: string }>) {
   });
 }
 
-export default function DesignPage() {
+export function DesignPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const action = searchParams.get('action');
   const { user, logout, approvals } = useApp();
   const isPic = canEdit(user?.role);
   const [items, setItems] = useState<MasterItem[]>([]);
@@ -223,6 +225,10 @@ export default function DesignPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingItem, setEditingItem] = useState<MasterItem | null>(null);
+  const [showGlobalRevisionModal, setShowGlobalRevisionModal] = useState(false);
+  const [globalRevisionItemId, setGlobalRevisionItemId] = useState('');
+  const [globalRevisionItemSearch, setGlobalRevisionItemSearch] = useState('');
+  const [isGlobalRevisionDropdownOpen, setIsGlobalRevisionDropdownOpen] = useState(false);
 
   // Lists for dropdown
   const [lines, setLines] = useState<any[]>([]);
@@ -366,6 +372,74 @@ export default function DesignPage() {
       if (!confirmLeave) return;
     }
     setShowEditModal(false);
+  };
+
+  useEffect(() => {
+    if (action === 'revision') {
+      setShowGlobalRevisionModal(true);
+    } else {
+      setShowGlobalRevisionModal(false);
+    }
+  }, [action]);
+
+  const handleSelectGlobalRevisionItem = (itemId: string) => {
+    setGlobalRevisionItemId(itemId);
+    const selectedItem = items.find((i) => i.id === itemId);
+    if (selectedItem) {
+      const curRev = parseInt(selectedItem.revStatus || '0', 10);
+      const nextRev = isNaN(curRev) ? '1' : String(curRev + 1);
+      setRevStatus(nextRev);
+      
+      const approvedDoc = selectedItem.documents?.find(d => d.approvalStatus === 'APPROVED');
+      setDocLocation2D(approvedDoc?.loc2D || '');
+      setDocLocation3D('');
+      setSelectedVendorId(selectedItem.vendor?.id || '');
+    }
+  };
+
+  const handleCloseGlobalRevisionModal = () => {
+    setShowGlobalRevisionModal(false);
+    setGlobalRevisionItemId('');
+    setGlobalRevisionItemSearch('');
+    setIsGlobalRevisionDropdownOpen(false);
+    setRevStatus('1');
+    setDesignDateNew(new Date().toISOString().split('T')[0]);
+    setDocLocation2D('');
+    setDocLocation3D('');
+    setRevisionNote('');
+    setSelectedVendorId('');
+    setPoNumber('');
+    setCost(0);
+    setLeadTime(1);
+    router.push('/design');
+  };
+
+  const handleGlobalRevisionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!globalRevisionItemId) return;
+    setSubmitting(true);
+    try {
+      const selectedItem = items.find((i) => i.id === globalRevisionItemId);
+      await submitDesignUpdate(globalRevisionItemId, {
+        revStatus,
+        designDateNew: designDateNew || undefined,
+        docLocation2D: docLocation2D || undefined,
+        docLocation3D: docLocation3D || undefined,
+        revisionNote: revisionNote || undefined,
+        vendorId: selectedVendorId || undefined,
+        poNumber: poNumber || undefined,
+        cost: cost ? parseFloat(String(cost)) : undefined,
+        leadTime: leadTime ? parseInt(String(leadTime), 10) : undefined,
+      });
+
+      setToast({ type: 'success', msg: `Revisi ${selectedItem?.noReg} (Rev ${revStatus}) berhasil diajukan ke Approval Center!` });
+      handleCloseGlobalRevisionModal();
+      loadData();
+    } catch (err: any) {
+      setToast({ type: 'error', msg: err.message || 'Gagal mengajukan revisi.' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
@@ -560,9 +634,9 @@ export default function DesignPage() {
     filteredItems.forEach((item, idx) => {
       const stockStatus =
         item.actualStock === 0 ? 'EMPTY'
-        : item.actualStock < item.minimumStock * 0.5 ? 'CRITICAL'
-        : item.actualStock < item.minimumStock ? 'WARNING'
-        : 'AMAN';
+          : item.actualStock < item.minimumStock * 0.5 ? 'CRITICAL'
+            : item.actualStock < item.minimumStock ? 'WARNING'
+              : 'AMAN';
 
       const rowData: any = { no: idx + 1 };
       if (exportCols.noReg) rowData.noReg = item.noReg;
@@ -645,9 +719,6 @@ export default function DesignPage() {
             <span className="material-symbols-outlined text-blue-600 text-lg">database</span>
             View Master Data Design
           </h2>
-          <p className="text-[10px] text-gray-500">
-            Penelusuran menyeluruh informasi Jig, riwayat modifikasi vendor/cost, log abnormality, serta status stok.
-          </p>
         </div>
 
         {/* Actions header group */}
@@ -699,13 +770,16 @@ export default function DesignPage() {
                       <Link
                         href="/inventory"
                         onClick={() => setShowNotifications(false)}
-                        className="block p-1.5 rounded bg-red-50 hover:bg-red-100/50 transition-colors text-[9px]"
+                        className="block p-1.5 rounded bg-red-600 hover:bg-red-700 transition-colors text-[9px] text-white"
                       >
-                        <div className="flex items-center gap-1 mb-0.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
-                          <span className="font-bold text-red-700">Kritis: Stok 0 Unit</span>
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="relative flex h-1.5 w-1.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
+                          </span>
+                          <span className="font-bold">Kritis: Stok 0 Unit</span>
                         </div>
-                        <p className="text-[8.5px] text-red-600 leading-tight">
+                        <p className="text-[8.5px] text-red-100 leading-tight">
                           {alerts.redItems.length} Jig habis stok.
                         </p>
                       </Link>
@@ -733,15 +807,12 @@ export default function DesignPage() {
                       <Link
                         href="/approval-center"
                         onClick={() => setShowNotifications(false)}
-                        className="block p-1.5 rounded bg-blue-50 hover:bg-blue-100/50 transition-colors text-[9px]"
+                        className="block p-1.5 rounded bg-blue-600 hover:bg-blue-700 transition-colors text-[9px] text-white"
                       >
-                        <div className="flex items-center gap-1 mb-0.5">
-                          <span className="material-symbols-outlined text-[10px] text-blue-600 font-bold">pending</span>
-                          <span className="font-bold text-blue-700">Approval Menunggu</span>
+                        <div className="flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[10px] text-white font-bold">pending</span>
+                          <span className="font-bold">{waitingApprovalsCount} pengajuan butuh review</span>
                         </div>
-                        <p className="text-[8.5px] text-blue-650 leading-tight">
-                          {waitingApprovalsCount} pengajuan butuh review.
-                        </p>
                       </Link>
                     )}
                   </div>
@@ -875,8 +946,8 @@ export default function DesignPage() {
                 <th className="px-2 py-2">OP (Process)</th>
                 <th className="px-2 py-2">Type</th>
                 <th className="px-2 py-2 text-center">Lifecycle</th>
-                <th className="px-2 py-2 text-center">Stock</th>
-                <th className="px-2 py-2 text-center">Abn</th>
+                <th className="px-2 py-2 text-center w-[85px]">Stock</th>
+                <th className="px-2 py-2 text-center w-[85px]">Abn</th>
                 {isPic && <th className="px-2 py-2 text-center w-20">Aksi</th>}
               </tr>
             </thead>
@@ -911,12 +982,18 @@ export default function DesignPage() {
                         {item.lifecycleStatus || 'ACTIVE'}
                       </span>
                     </td>
-                    <td className={`px-2 py-2 text-center font-bold text-[9px] uppercase tracking-wider ${isRed ? 'bg-red-500 text-white' : isYellow ? 'bg-yellow-400 text-yellow-950' : 'bg-green-500 text-white'
+                    <td className={`px-2 py-2 text-center font-bold text-[9px] uppercase tracking-wider border-r-2 border-white ${isRed ? 'bg-red-500 text-white' : isYellow ? 'bg-yellow-400 text-yellow-950' : 'bg-green-500 text-white'
                       }`}>
                       {isRed ? 'Critical' : isYellow ? 'Warning' : 'Aman'}
                     </td>
-                    <td className="px-2 py-2 text-center">
-                      <span className={`w-2.5 h-2.5 rounded-full inline-block ${item.abnormalityStatus === 'RESOLVED' ? 'bg-green-500' : item.abnormalityStatus === 'IN_PROGRESS' ? 'bg-yellow-400' : 'bg-red-500 animate-pulse'}`}></span>
+                    <td className={`px-2 py-2 text-center font-bold text-[9px] uppercase tracking-wider border-r-2 border-white ${
+                      item.abnormalityStatus === 'RESOLVED' ? 'bg-green-500 text-white' :
+                      item.abnormalityStatus === 'IN_PROGRESS' ? 'bg-yellow-400 text-yellow-950' :
+                      'bg-red-500 text-white animate-pulse'
+                    }`}>
+                      {item.abnormalityStatus === 'RESOLVED' ? 'Aman' :
+                       item.abnormalityStatus === 'IN_PROGRESS' ? 'Monitoring' :
+                       'Anomali'}
                     </td>
                     {isPic && (
                       <td className="px-2 py-2 text-center" onClick={(e) => e.stopPropagation()}>
@@ -1237,8 +1314,8 @@ export default function DesignPage() {
             {/* Header */}
             <div className="p-4 border-b border-gray-150 flex justify-between items-center bg-gray-50">
               <h3 className="font-bold text-xs text-gray-800 flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-green-600 text-sm">edit_square</span>
-                <span>Edit Revisi — <span className="font-mono text-green-600">{editingItem.noReg}</span></span>
+                <span className="material-symbols-outlined text-blue-600 text-sm">edit_square</span>
+                <span>Edit Revisi — <span className="font-mono text-blue-600">{editingItem.noReg}</span></span>
               </h3>
               <button onClick={handleCloseEditModal} className="text-gray-400 hover:text-gray-600 font-bold text-sm">✕</button>
             </div>
@@ -1276,7 +1353,7 @@ export default function DesignPage() {
                   <input
                     type="date"
                     required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-green-500 outline-none text-gray-700"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700"
                     value={designDateNew}
                     onChange={(e) => setDesignDateNew(e.target.value)}
                   />
@@ -1383,7 +1460,7 @@ export default function DesignPage() {
                     type="number"
                     min="0"
                     placeholder="Contoh: 15000000"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-green-500 outline-none text-gray-700 font-bold"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700 font-bold"
                     value={cost}
                     onChange={(e) => setCost(parseFloat(e.target.value) || 0)}
                   />
@@ -1399,7 +1476,7 @@ export default function DesignPage() {
                   onChange={(e) => setRevisionNote(e.target.value)}
                   required
                   rows={2}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-green-500 outline-none resize-none text-gray-700"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none resize-none text-gray-700"
                 />
               </div>
 
@@ -1415,7 +1492,7 @@ export default function DesignPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 py-1.5 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-1 cursor-pointer"
+                  className="flex-1 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-1 cursor-pointer"
                 >
                   {submitting ? (
                     <span className="material-symbols-outlined animate-spin text-sm">sync</span>
@@ -1542,6 +1619,332 @@ export default function DesignPage() {
           </div>
         </div>
       )}
+      {/* GLOBAL SUBMIT REVISION MODAL */}
+      {showGlobalRevisionModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[90]">
+          <div className="bg-white border border-gray-300 rounded-2xl w-full max-w-xl min-h-[460px] max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative text-gray-800">
+            {/* Header */}
+            <div className="p-4 border-b border-gray-150 flex justify-between items-center bg-gray-50">
+              <h3 className="font-bold text-xs text-gray-800 flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-blue-600 text-sm">history</span>
+                <span>Submit Revision Request</span>
+              </h3>
+              <button onClick={handleCloseGlobalRevisionModal} className="text-gray-400 hover:text-gray-600 font-bold text-sm">✕</button>
+            </div>
+
+            {/* Form Body */}
+            <form onSubmit={handleGlobalRevisionSubmit} className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+              {/* Item Selector Dropdown */}
+              <div>
+                <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Pilih Item Jig/Fixture *</label>
+                {(() => {
+                  const selectedItem = items.find((item) => item.id === globalRevisionItemId);
+                  const filteredItems = items.filter((item) => {
+                    const query = globalRevisionItemSearch.toLowerCase();
+                    return (
+                      item.noReg.toLowerCase().includes(query) ||
+                      item.assyPartName.toLowerCase().includes(query) ||
+                      item.lineProduct.toLowerCase().includes(query)
+                    );
+                  });
+
+                  return (
+                    <div className="relative">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="-- Cari berdasarkan No. Reg / Part Name / Line --"
+                          value={isGlobalRevisionDropdownOpen ? globalRevisionItemSearch : (selectedItem ? `${selectedItem.noReg} — ${selectedItem.assyPartName} [${selectedItem.lineProduct}]` : '')}
+                          onChange={(e) => {
+                            setGlobalRevisionItemSearch(e.target.value);
+                            if (!isGlobalRevisionDropdownOpen) setIsGlobalRevisionDropdownOpen(true);
+                          }}
+                          onFocus={() => {
+                            setIsGlobalRevisionDropdownOpen(true);
+                            setGlobalRevisionItemSearch('');
+                          }}
+                          className="w-full border border-gray-300 rounded-lg pl-3 pr-12 py-1.5 text-xs bg-white focus:ring-1 focus:ring-[#0063ff] outline-none text-gray-700 font-medium"
+                        />
+                        <input type="hidden" required value={globalRevisionItemId} />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                          {globalRevisionItemId && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setGlobalRevisionItemId('');
+                                setGlobalRevisionItemSearch('');
+                              }}
+                              className="text-gray-400 hover:text-gray-650 cursor-pointer flex"
+                            >
+                              <span className="material-symbols-outlined text-[14px]">close</span>
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setIsGlobalRevisionDropdownOpen(!isGlobalRevisionDropdownOpen)}
+                            className="text-gray-400 hover:text-gray-650 cursor-pointer flex"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">
+                              {isGlobalRevisionDropdownOpen ? 'expand_less' : 'expand_more'}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Dropdown Options */}
+                      {isGlobalRevisionDropdownOpen && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-40"
+                            onClick={() => setIsGlobalRevisionDropdownOpen(false)}
+                          ></div>
+
+                          <ul className="absolute left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg z-50 text-xs no-scrollbar py-1">
+                            {filteredItems.length > 0 ? (
+                              filteredItems.map((item) => {
+                                const isSelected = item.id === globalRevisionItemId;
+                                return (
+                                  <li
+                                    key={item.id}
+                                    onClick={() => {
+                                      handleSelectGlobalRevisionItem(item.id);
+                                      setIsGlobalRevisionDropdownOpen(false);
+                                      setGlobalRevisionItemSearch('');
+                                    }}
+                                    className={`px-3 py-2 cursor-pointer transition-colors flex flex-col gap-0.5 ${
+                                      isSelected
+                                        ? 'bg-blue-50 text-blue-700 font-bold'
+                                        : 'text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                  >
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-semibold text-gray-800">{item.noReg}</span>
+                                      <span className="text-[8px] uppercase font-bold bg-gray-150 text-gray-600 px-1.5 py-0.25 rounded font-mono">
+                                        {item.lineProduct}
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] text-gray-500 font-medium truncate">{item.assyPartName}</span>
+                                  </li>
+                                );
+                              })
+                            ) : (
+                              <li className="px-3 py-2 text-gray-400 italic text-center">Item tidak ditemukan</li>
+                            )}
+                          </ul>
+                        </>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {globalRevisionItemId ? (
+                <div className="space-y-4 pt-2 border-t border-gray-100">
+                  <div className="grid grid-cols-2 gap-3.5">
+                    {/* Rev Status (Locked Next Rev) */}
+                    <div>
+                      <label className="block text-[9px] font-bold text-gray-400 uppercase mb-1">Target Revisi (Auto)</label>
+                      <input
+                        type="text"
+                        disabled
+                        readOnly
+                        className="w-full border border-gray-250 bg-gray-100 rounded-lg px-3 py-1.5 text-xs outline-none text-gray-500 font-mono font-semibold"
+                        value={`Rev ${revStatus}`}
+                      />
+                    </div>
+
+                    {/* New Design Date */}
+                    <div>
+                      <label className="block text-[9px] font-bold text-gray-400 uppercase mb-1">Tanggal Desain Baru *</label>
+                      <input
+                        type="date"
+                        required
+                        className="w-full border border-gray-250 rounded-lg px-3 py-1.5 text-xs outline-none text-gray-700 font-medium"
+                        value={designDateNew}
+                        onChange={(e) => setDesignDateNew(e.target.value)}
+                      />
+                    </div>
+
+                    {/* 2D drawing upload */}
+                    <div className="col-span-2">
+                      <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Drawing 2D (PDF) *</label>
+                      <div className="flex gap-2">
+                        <label className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg cursor-pointer transition-colors text-xs font-semibold">
+                          <span className="material-symbols-outlined text-sm text-gray-600">upload_file</span>
+                          <span className="text-[9px] font-bold text-gray-700">Upload 2D PDF</span>
+                          <input
+                            type="file"
+                            accept=".pdf"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              try {
+                                const result = await uploadFile(file);
+                                setDocLocation2D(result.url);
+                              } catch (err) {
+                                alert('Gagal upload file 2D. Coba lagi.');
+                              }
+                            }}
+                          />
+                        </label>
+                        <input
+                          type="text"
+                          readOnly
+                          className="flex-1 border border-gray-250 bg-gray-50 rounded-lg px-3 py-1.5 text-xs text-gray-500 outline-none truncate font-mono"
+                          value={docLocation2D ? docLocation2D.replace('/uploads/', '') : 'Pilih file PDF...'}
+                        />
+                      </div>
+                    </div>
+
+                    {/* 3D model upload */}
+                    <div className="col-span-2">
+                      <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Model 3D (Zip / File) *</label>
+                      <div className="flex gap-2">
+                        <label className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg cursor-pointer transition-colors text-xs font-semibold">
+                          <span className="material-symbols-outlined text-sm text-gray-600">upload_file</span>
+                          <span className="text-[9px] font-bold text-gray-700">Upload 3D Model</span>
+                          <input
+                            type="file"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              try {
+                                const result = await uploadFile(file);
+                                setDocLocation3D(result.url);
+                              } catch (err) {
+                                alert('Gagal upload file 3D. Coba lagi.');
+                              }
+                            }}
+                          />
+                        </label>
+                        <input
+                          type="text"
+                          readOnly
+                          className="flex-1 border border-gray-250 bg-gray-50 rounded-lg px-3 py-1.5 text-xs text-gray-500 outline-none truncate font-mono"
+                          value={docLocation3D ? docLocation3D.replace('/uploads/', '') : 'Pilih file 3D...'}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Vendor Select */}
+                    <div>
+                      <label className="block text-[9px] font-bold text-gray-400 uppercase mb-1">Pilih Vendor Fabrikasi</label>
+                      <select
+                        className="w-full border border-gray-250 rounded-lg px-3 py-1.5 text-xs outline-none bg-white text-gray-700 font-medium"
+                        value={selectedVendorId}
+                        onChange={(e) => setSelectedVendorId(e.target.value)}
+                      >
+                        <option value="">-- Pilih vendor --</option>
+                        {vendors.map((v) => (
+                          <option key={v.id} value={v.id}>{v.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* PO Number */}
+                    <div>
+                      <label className="block text-[9px] font-bold text-gray-400 uppercase mb-1">Nomor PO (Purchase Order)</label>
+                      <input
+                        type="text"
+                        placeholder="Ketik No PO..."
+                        className="w-full border border-gray-250 rounded-lg px-3 py-1.5 text-xs outline-none text-gray-700"
+                        value={poNumber}
+                        onChange={(e) => setPoNumber(e.target.value)}
+                      />
+                    </div>
+
+                    {/* Cost / Biaya */}
+                    <div>
+                      <label className="block text-[9px] font-bold text-gray-400 uppercase mb-1">Estimasi Biaya (Rp)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Rp..."
+                        className="w-full border border-gray-250 rounded-lg px-3 py-1.5 text-xs outline-none text-gray-705 font-bold"
+                        value={cost || ''}
+                        onChange={(e) => setCost(parseFloat(e.target.value) || 0)}
+                      />
+                    </div>
+
+                    {/* Lead Time */}
+                    <div>
+                      <label className="block text-[9px] font-bold text-gray-400 uppercase mb-1">Lead Time (Hari)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="Hari..."
+                        className="w-full border border-gray-250 rounded-lg px-3 py-1.5 text-xs outline-none text-gray-705 font-bold"
+                        value={leadTime || ''}
+                        onChange={(e) => setLeadTime(parseInt(e.target.value, 10) || 1)}
+                      />
+                    </div>
+
+                    {/* Revision Note */}
+                    <div className="col-span-2">
+                      <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Catatan / Alasan Revisi *</label>
+                      <textarea
+                        required
+                        rows={2}
+                        placeholder="Uraikan detail revisi desain..."
+                        className="w-full border border-gray-250 rounded-lg px-3 py-1.5 text-xs outline-none text-gray-700 resize-none"
+                        value={revisionNote}
+                        onChange={(e) => setRevisionNote(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={handleCloseGlobalRevisionModal}
+                      className="flex-1 py-1.5 border border-gray-300 text-gray-600 rounded-lg text-xs font-bold hover:bg-gray-100 transition-colors"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="flex-1 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors flex items-center justify-center gap-1"
+                    >
+                      {submitting ? (
+                        <>
+                          <span className="material-symbols-outlined animate-spin text-sm">sync</span>
+                          Mengirim...
+                        </>
+                      ) : (
+                        'Ajukan Revisi'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-12 text-center text-gray-400 text-xs italic">
+                  Silakan pilih item Jig/Fixture untuk memulai revisi.
+                </div>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+export default function DesignPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex-1 flex items-center justify-center p-6 bg-white">
+        <div className="text-center">
+          <span className="material-symbols-outlined animate-spin text-2xl text-primary">sync</span>
+          <p className="text-xs text-gray-500 mt-2 font-medium">Memuat data desain...</p>
+        </div>
+      </div>
+    }>
+      <DesignPageContent />
+    </Suspense>
   );
 }
