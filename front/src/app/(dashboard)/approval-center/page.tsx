@@ -120,7 +120,7 @@ export default function ApprovalCenterPage() {
               return (
                 <tr key={app.id} className="hover:bg-gray-50 transition-colors">
                   {/* Reg No */}
-                  <td className="py-3 px-4 font-mono text-[10px] text-gray-900 font-bold">
+                  <td className="py-3 px-4 font-mono text-[10px] text-gray-900 font-normal">
                     {app.noReg}
                   </td>
 

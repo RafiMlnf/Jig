@@ -137,7 +137,8 @@ export default function StepViewer({ fileUrl, fileName, onClose }: StepViewerPro
 
     (async () => {
       try {
-        setLoadStep('Mengunduh file STEP...');
+        const isIges = fileUrl.toLowerCase().endsWith('.igs') || fileUrl.toLowerCase().endsWith('.iges');
+        setLoadStep(isIges ? 'Mengunduh file IGS...' : 'Mengunduh file STEP...');
         setLoadProgress(10);
         const resp = await fetch(fileUrl);
         if (!resp.ok) throw new Error(`Gagal mengunduh file: HTTP ${resp.status}`);
@@ -150,13 +151,15 @@ export default function StepViewer({ fileUrl, fileName, onClose }: StepViewerPro
         setLoadProgress(65);
 
         if (cancelled) return;
-        setLoadStep('Parsing geometri STEP...');
+        setLoadStep(isIges ? 'Parsing geometri IGS...' : 'Parsing geometri STEP...');
 
         const fileBuffer = new Uint8Array(arrayBuffer);
-        const result = occt.ReadStepFile(fileBuffer, null);
+        const result = isIges 
+          ? occt.ReadIgesFile(fileBuffer, null)
+          : occt.ReadStepFile(fileBuffer, null);
         setLoadProgress(85);
 
-        if (!result.success) throw new Error('Gagal parse file STEP. Pastikan file valid.');
+        if (!result.success) throw new Error(`Gagal parse file ${isIges ? 'IGS' : 'STEP'}. Pastikan file valid.`);
         if (cancelled) return;
 
         setLoadStep('Membangun mesh 3D...');
@@ -225,7 +228,9 @@ export default function StepViewer({ fileUrl, fileName, onClose }: StepViewerPro
           <span className="material-symbols-outlined text-[18px]" style={{ color: '#4f46e5' }}>deployed_code</span>
           <span className="text-[11px] font-bold text-gray-800 truncate">{displayName}</span>
           {loadState === 'ready' && (
-            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full ml-1" style={{ background: '#f1f5f9', color: '#4f46e5' }}>STEP</span>
+            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full ml-1" style={{ background: '#f1f5f9', color: '#4f46e5' }}>
+              {fileUrl.toLowerCase().endsWith('.igs') || fileUrl.toLowerCase().endsWith('.iges') ? 'IGS' : 'STEP'}
+            </span>
           )}
         </div>
 

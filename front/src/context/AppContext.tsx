@@ -79,7 +79,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const savedToken = Cookies.get('auth_token');
     if (savedToken) {
       try {
-        const res = await fetch('http://localhost:3001/api/users/me', {
+        const res = await fetch('http://localhost:3002/api/users/me', {
           headers: { 'Authorization': `Bearer ${savedToken}` }
         });
         if (res.ok) {
@@ -132,7 +132,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/api/auth/login', {
+      const res = await fetch('http://localhost:3002/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

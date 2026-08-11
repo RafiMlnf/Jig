@@ -54,7 +54,7 @@ export default function ReviewApprovalPage({ params }: PageProps) {
   // Fetch approval detail directly from backend (includes design.revisionHistories)
   useEffect(() => {
     const token = document.cookie.match(/auth_token=([^;]+)/)?.[1] || '';
-    fetch(`http://localhost:3001/api/approvals/${id}`, {
+    fetch(`http://localhost:3002/api/approvals/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (res) => {

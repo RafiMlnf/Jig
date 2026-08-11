@@ -9,7 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.setGlobalPrefix('api');
   app.enableCors();
-  
+
   // Serve the extracted CAD images from excel
   app.useStaticAssets(join(__dirname, '..', '..', 'xlsx_images'), {
     prefix: '/images/',
@@ -24,7 +24,7 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
 
-  const port = process.env.PORT ?? 3001;
+  const port = process.env.PORT ?? 3002;
   await app.listen(port);
   console.log(`NestJS backend listening on port ${port}`);
 }

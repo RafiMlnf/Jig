@@ -1,3 +1,4 @@
+// Trigger watch reload for IGS support v2
 import {
   Controller,
   Post,
@@ -22,10 +23,10 @@ export class UploadController {
     FileInterceptor('file', {
       storage: memoryStorage(),
       fileFilter: (_req, file, cb) => {
-        const allowed = ['.pdf', '.step', '.stp'];
+        const allowed = ['.pdf', '.step', '.stp', '.igs', '.iges'];
         const ext = extname(file.originalname).toLowerCase();
         if (!allowed.includes(ext)) {
-          return cb(new BadRequestException('Hanya file PDF, STEP, atau STP yang diizinkan'), false);
+          return cb(new BadRequestException('Hanya file PDF, STEP, STP, atau IGS/IGES yang diizinkan'), false);
         }
         cb(null, true);
       },

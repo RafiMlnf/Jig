@@ -175,7 +175,7 @@ export default function InventoryPage() {
                   className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${isRed ? 'border-b border-red-100 bg-red-50 hover:bg-red-100/60' : ''
                     }`}
                 >
-                  <td className={`px-3 font-medium font-mono py-2 ${isRed ? 'text-red-700' : ''}`}>
+                  <td className={`px-3 font-normal font-mono py-2 ${isRed ? 'text-red-700' : ''}`}>
                     {item.noReg}
                   </td>
                   <td className="px-2 py-2 flex items-center gap-1.5">

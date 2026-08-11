@@ -8,7 +8,7 @@ export class HttpError extends Error {
   }
 }
 
-const BASE = 'http://localhost:3001';
+const BASE = 'http://localhost:3002';
 
 function getToken(): string {
   return Cookies.get('auth_token') || '';
@@ -179,7 +179,7 @@ export async function uploadFile(file: File): Promise<{ url: string; filename: s
 export function getFileUrl(path: string | null | undefined): string | null {
   if (!path) return null;
   if (path.startsWith('http')) return path;
-  return `http://localhost:3001${path}`;
+  return `http://localhost:3002${path}`;
 }
 
 /** Delete a design item and all related records */

@@ -1019,14 +1019,20 @@ export function DesignPageContent() {
                       <td className="px-2 py-2 text-center" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-center gap-1.5">
                           <button
-                            onClick={() => handleOpenEditModal(item)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenEditModal(item);
+                            }}
                             className="text-gray-650 hover:text-gray-900 transition-colors cursor-pointer inline-flex items-center justify-center"
                             title="Update Desain"
                           >
                             <span className="material-symbols-outlined text-[11px]">edit</span>
                           </button>
                           <button
-                            onClick={() => handleOpenDeleteConfirm(item)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenDeleteConfirm(item);
+                            }}
                             className="text-gray-655 hover:text-red-650 transition-colors cursor-pointer inline-flex items-center justify-center"
                             title="Hapus Desain"
                           >
@@ -1208,11 +1214,11 @@ export function DesignPageContent() {
 
                 {/* 3D upload */}
                 <div>
-                  <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Model 3D (STEP/PDF)</label>
+                  <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Model 3D (STEP/IGS/PDF)</label>
                   <label className="flex flex-col items-center justify-center border border-dashed border-gray-300 rounded-xl p-2 cursor-pointer hover:bg-blue-50/50 hover:border-[#0063ff] transition-all h-20 bg-white text-center shadow-3xs">
                     <input
                       type="file"
-                      accept=".step,.stp,.pdf"
+                      accept=".step,.stp,.pdf,.igs,.iges"
                       className="hidden"
                       onChange={async (e) => {
                         const file = e.target.files?.[0];
@@ -1328,6 +1334,44 @@ export function DesignPageContent() {
         </div>
       )}
 
+      {/* DELETE CONFIRMATION MODAL */}
+      {showDeleteConfirmModal && itemToDelete && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[90]">
+          <div className="bg-white border border-gray-300 rounded-2xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl relative p-6 text-gray-800">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-12 h-12 rounded-full bg-red-50 border border-red-200 flex items-center justify-center">
+                <span className="material-symbols-outlined text-red-650 text-2xl">delete_forever</span>
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="font-bold text-sm text-gray-900">Hapus Item Desain</h3>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  Apakah Anda yakin ingin menghapus item <span className="font-mono font-semibold text-gray-800">{itemToDelete.noReg}</span>? Tindakan ini tidak dapat dibatalkan dan semua data riwayat revisi terkait akan dihapus.
+                </p>
+              </div>
+              <div className="flex items-center gap-3 w-full pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDeleteConfirmModal(false);
+                    setItemToDelete(null);
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50 transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDelete}
+                  className="flex-1 px-4 py-2 bg-red-650 hover:bg-red-700 rounded-xl text-xs font-bold text-white transition-colors"
+                >
+                  Ya, Hapus
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* EDIT / UPDATE DESIGN REVISION MODAL */}
       {showEditModal && editingItem && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[90]">
@@ -1410,11 +1454,11 @@ export function DesignPageContent() {
 
                 {/* 3D upload */}
                 <div>
-                  <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Model 3D (STEP/PDF)</label>
+                  <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Model 3D (STEP/IGS/PDF)</label>
                   <label className="flex flex-col items-center justify-center border border-dashed border-gray-300 rounded-xl p-2 cursor-pointer hover:bg-blue-50/50 hover:border-[#0063ff] transition-all h-20 bg-white text-center shadow-3xs">
                     <input
                       type="file"
-                      accept=".step,.stp,.pdf"
+                      accept=".step,.stp,.pdf,.igs,.iges"
                       className="hidden"
                       onChange={async (e) => {
                         const file = e.target.files?.[0];
