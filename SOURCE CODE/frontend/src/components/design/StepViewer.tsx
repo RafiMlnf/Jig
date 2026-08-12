@@ -275,22 +275,52 @@ export default function StepViewer({ fileUrl, fileName, onClose }: StepViewerPro
       <div className="flex-1 relative min-h-0">
         <div ref={mountRef} className="w-full h-full" />
 
-        {/* Loading overlay */}
+        {/* Loading overlay (Skeleton Loader) */}
         {loadState === 'loading' && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4" style={{ backgroundColor: bgColorStyle }}>
-            <div className="relative w-14 h-14">
-              <div className="absolute inset-0 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#4f46e5', borderTopColor: 'transparent' }} />
-              <div className="absolute inset-2 rounded-full border-2 border-b-transparent animate-spin" style={{ borderColor: '#818cf8', borderBottomColor: 'transparent', animationDirection: 'reverse', animationDuration: '0.7s' }} />
-              <span className="absolute inset-0 flex items-center justify-center material-symbols-outlined text-[18px]" style={{ color: '#4f46e5' }}>deployed_code</span>
+          <div className="absolute inset-0 flex flex-col justify-between p-6 overflow-hidden" style={{ backgroundColor: bgColorStyle }}>
+            {/* Shimmering Grid Background */}
+            <div className="absolute inset-0 grid grid-cols-12 grid-rows-12 gap-2 p-2 opacity-25 pointer-events-none">
+              {[...Array(144)].map((_, i) => (
+                <div key={i} className="border border-gray-400/30 rounded-sm bg-gray-300/10 animate-pulse" />
+              ))}
             </div>
-            <div className="text-center space-y-1.5">
-              <p className="text-[12px] font-bold text-gray-800">{loadStep}</p>
-              <p className="text-[10px]" style={{ color: '#64748b' }}>{displayName}</p>
+
+            {/* Central Isometric Wireframe Shape */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="relative w-64 h-64 flex items-center justify-center">
+                {/* Outmost pulsing circle */}
+                <div className="absolute w-60 h-60 rounded-full border-2 border-dashed border-indigo-200/40 animate-pulse" />
+                {/* Pulsing wireframe block */}
+                <div className="w-36 h-36 rounded-2xl border-4 border-indigo-300/50 bg-white/40 backdrop-blur-sm shadow-xl flex items-center justify-center animate-pulse relative">
+                  {/* Corner notches for blueprint feel */}
+                  <div className="absolute -top-1.5 -left-1.5 w-4 h-4 border-t-4 border-l-4 border-indigo-500/60" />
+                  <div className="absolute -top-1.5 -right-1.5 w-4 h-4 border-t-4 border-r-4 border-indigo-500/60" />
+                  <div className="absolute -bottom-1.5 -left-1.5 w-4 h-4 border-b-4 border-l-4 border-indigo-500/60" />
+                  <div className="absolute -bottom-1.5 -right-1.5 w-4 h-4 border-b-4 border-r-4 border-indigo-500/60" />
+                  
+                  <span className="material-symbols-outlined text-[64px] text-indigo-500/70 animate-pulse" style={{ animationDuration: '1.5s' }}>
+                    view_in_ar
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="w-52 h-1 rounded-full overflow-hidden" style={{ background: '#e2e8f0' }}>
-              <div className="h-full rounded-full transition-all duration-300" style={{ width: `${loadProgress}%`, background: 'linear-gradient(90deg, #4f46e5, #818cf8)' }} />
+
+            {/* Status Panel HUD (Bottom overlay) */}
+            <div className="relative mt-auto mx-auto w-full max-w-md bg-white/85 backdrop-blur-md border border-gray-200 shadow-lg rounded-2xl p-4 flex flex-col gap-3 transition-all z-10">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px] text-indigo-600 animate-spin" style={{ animationDuration: '3s' }}>sync</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-extrabold text-gray-800 tracking-wide uppercase">{loadStep}</p>
+                  <p className="text-[9px] text-gray-500 truncate mt-0.5">{displayName}</p>
+                </div>
+                <span className="text-[11px] font-mono font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{loadProgress}%</span>
+              </div>
+              
+              {/* Progress bar */}
+              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden border border-gray-200/50">
+                <div className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-indigo-500 to-indigo-600" style={{ width: `${loadProgress}%` }} />
+              </div>
             </div>
-            <p className="text-[9px] font-mono text-indigo-600">{loadProgress}%</p>
           </div>
         )}
 

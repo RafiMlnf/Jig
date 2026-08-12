@@ -26,6 +26,12 @@ export default function EditInventoryPage({ params }: PageProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!isLoading && !canEdit(user?.role)) {
+      router.replace('/design');
+    }
+  }, [isLoading, user, router]);
+
+  useEffect(() => {
     if (item) {
       setMinStock(item.minimumStock);
       setActStock(item.actualStock);

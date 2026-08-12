@@ -94,7 +94,7 @@ export default function Sidebar() {
   const { logout } = useApp();
 
   return (
-    <aside className="w-56 bg-surface-container-low border-r border-outline-variant flex flex-col h-full z-10 shrink-0">
+    <aside className="w-56 bg-surface-container-low flex flex-col h-full z-10 shrink-0">
 
       {/* Import ENOCH Font */}
       <style dangerouslySetInnerHTML={{
@@ -123,20 +123,20 @@ export default function Sidebar() {
             className={`absolute inset-y-0 left-2 right-0 transition-all duration-1000 ease-in-out flex items-center justify-start ${showLogoImage ? 'opacity-0 -translate-x-8 pointer-events-none' : 'opacity-100 translate-x-0'
               }`}
           >
-            <h1 className="text-[25px] text-on-surface leading-none text-left" style={{ fontFamily: "'ENOCH', sans-serif", fontWeight: 'normal' }}>
+            <h1 className="text-[25px] text-on-surface leading-none text-left font-normal" style={{ fontFamily: "'ENOCH', sans-serif", fontWeight: 'normal' }}>
               JIG FIXTURES
             </h1>
           </div>
 
           {/* Logo Image */}
           <div
-            className={`absolute inset-y-0 left-2 right-0 transition-all duration-1000 ease-in-out flex items-center justify-start ${showLogoImage ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8 pointer-events-none'
+            className={`absolute inset-y-0 left-0 right-0 transition-all duration-1000 ease-in-out flex items-center justify-start ${showLogoImage ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8 pointer-events-none'
               }`}
           >
             <Image
               src={logoImg}
               alt="MTM Logo"
-              className="h-10 w-auto object-contain"
+              className="h-8 w-auto object-contain"
               style={{
                 filter: 'url(#white-outline)'
               }}

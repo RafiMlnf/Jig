@@ -183,7 +183,7 @@ export function DesignPageContent() {
   const { user, logout, approvals } = useApp();
   const isPic = canEdit(user?.role);
   const [items, setItems] = useState<MasterItem[]>([]);
-  const [vendors, setVendors] = useState<Array<{ id: string; name: string }>>([]);
+  const [vendors, setVendors] = useState<Array<{ id: string; name: string; code: string }>>([]);
   const [loading, setLoading] = useState(true);
 
   // System warning alerts states

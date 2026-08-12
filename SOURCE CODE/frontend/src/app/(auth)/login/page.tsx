@@ -105,7 +105,7 @@ export default function LoginPage() {
                   type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Contoh: admin, 11520, etc."
+                  placeholder="..."
                   className="w-full bg-transparent px-4 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none"
                   required
                 />

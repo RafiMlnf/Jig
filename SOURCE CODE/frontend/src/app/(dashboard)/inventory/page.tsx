@@ -1,12 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { canEdit } from '@/lib/rbac';
 
 export default function InventoryPage() {
   const { items, user, isLoading } = useApp();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !canEdit(user?.role)) {
+      router.replace('/design');
+    }
+  }, [isLoading, user, router]);
+
   const isPic = !isLoading && canEdit(user?.role);
   const [search, setSearch] = useState('');
   const [lineFilter, setLineFilter] = useState('All');
