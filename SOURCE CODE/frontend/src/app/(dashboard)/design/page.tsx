@@ -409,7 +409,7 @@ export function DesignPageContent() {
       const curRev = parseInt(selectedItem.revStatus || '0', 10);
       const nextRev = isNaN(curRev) ? '1' : String(curRev + 1);
       setRevStatus(nextRev);
-      
+
       const approvedDoc = selectedItem.documents?.find(d => d.approvalStatus === 'APPROVED');
       setDocLocation2D(approvedDoc?.loc2D || '');
       setDocLocation3D('');
@@ -734,11 +734,21 @@ export function DesignPageContent() {
     <div className="flex-1 flex flex-col px-4 pb-4 pt-2 bg-white h-full overflow-hidden">
       {/* Header */}
       <header className="h-12 flex justify-between items-center border-b border-gray-150 mb-3 shrink-0">
-        <div>
-          <h2 className="text-base font-bold text-gray-800 flex items-center gap-1.5">
+        <div className="flex items-center gap-4 flex-1">
+          <h2 className="text-base font-bold text-gray-800 flex items-center gap-1.5 shrink-0">
             <span className="material-symbols-outlined text-blue-600 text-lg">database</span>
             View Master Data Design
           </h2>
+          {/* Search bar inside header */}
+          <div className="relative w-80">
+            <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[11px]" style={{ fontSize: '11px' }}>search</span>
+            <input
+              className="pl-7 pr-2.5 py-1.5 bg-gray-50 hover:bg-gray-100/70 border border-gray-300 rounded-lg w-full text-[10px] outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 font-medium transition-all"
+              placeholder="Cari Reg ID / Part Name / Assy No..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
 
         {/* Actions header group */}
@@ -748,7 +758,7 @@ export function DesignPageContent() {
               onClick={handleOpenCreateModal}
               className="bg-[#0063ff] text-white px-3.5 py-1.5 rounded-lg text-[10px] font-bold hover:bg-[#0052d4] transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
             >
-              <span className="material-symbols-outlined text-xs">add</span> Tambah Desain
+              <span className="material-symbols-outlined text-xs">add</span> Desain
             </button>
           )}
 
@@ -757,7 +767,7 @@ export function DesignPageContent() {
             onClick={() => setShowExportModal(true)}
             className="bg-[#0063ff] text-white px-3.5 py-1.5 rounded-lg text-[10px] font-bold hover:bg-[#0052d4] transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
-            <span className="material-symbols-outlined text-xs">download</span> Unduh Master List
+            <span className="material-symbols-outlined text-xs">download</span> Master List
           </button>
 
           {/* System Warnings Notifications */}
@@ -844,24 +854,10 @@ export function DesignPageContent() {
       </header>
 
       {/* Grid of filters */}
-      <div className="grid grid-cols-5 gap-2 bg-gray-50 p-3 rounded-xl mb-3 border border-gray-150 text-[9px] font-semibold text-gray-600">
-        {/* Search */}
-        <div className="col-span-2 relative">
-          <label className="block text-[8px] text-gray-400 mb-0.5">CARI REG ID / PART NAME / ASSY NO</label>
-          <div className="relative">
-            <span className="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]" style={{ fontSize: '10px' }}>search</span>
-            <input
-              className="pl-6 pr-2 py-1 bg-white border border-gray-300 rounded-lg w-full text-[10px] outline-none focus:ring-1 focus:ring-blue-500 font-medium"
-              placeholder="Ketik No. Reg / Part Name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-        </div>
-
+      <div className="grid grid-cols-8 gap-2 bg-gray-50 p-2.5 rounded-xl mb-3 border border-gray-150 text-[9px] font-semibold text-gray-600">
         {/* Production Line */}
         <div>
-          <label className="block text-[8px] text-gray-400 mb-0.5">LINE</label>
+          <label className="block text-[8px] text-gray-400 mb-0.5 uppercase">Line</label>
           <select value={lineFilter} onChange={(e) => setLineFilter(e.target.value)} className="w-full border border-gray-350 bg-white rounded p-1 text-[9px] outline-none">
             <option value="All">All Lines</option>
             {uniqueLines.map((l) => (
@@ -872,7 +868,7 @@ export function DesignPageContent() {
 
         {/* OP Number / Process */}
         <div>
-          <label className="block text-[8px] text-gray-400 mb-0.5">OP NUMBER</label>
+          <label className="block text-[8px] text-gray-400 mb-0.5 uppercase">OP Number</label>
           <select value={processFilter} onChange={(e) => setProcessFilter(e.target.value)} className="w-full border border-gray-350 bg-white rounded p-1 text-[9px] outline-none">
             <option value="All">All OP</option>
             {uniqueProcesses.map((p) => (
@@ -883,7 +879,7 @@ export function DesignPageContent() {
 
         {/* Type */}
         <div>
-          <label className="block text-[8px] text-gray-400 mb-0.5">TYPE</label>
+          <label className="block text-[8px] text-gray-400 mb-0.5 uppercase">Type</label>
           <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="w-full border border-gray-350 bg-white rounded p-1 text-[9px] outline-none">
             <option value="All">All Types</option>
             <option value="JF">JF (Jig Fixture)</option>
@@ -893,7 +889,7 @@ export function DesignPageContent() {
 
         {/* Vendor */}
         <div>
-          <label className="block text-[8px] text-gray-400 mb-0.5">VENDOR</label>
+          <label className="block text-[8px] text-gray-400 mb-0.5 uppercase">Vendor</label>
           <select value={vendorFilter} onChange={(e) => setVendorFilter(e.target.value)} className="w-full border border-gray-350 bg-white rounded p-1 text-[9px] outline-none">
             <option value="All">All Vendors</option>
             {vendors.map((v) => (
@@ -904,7 +900,7 @@ export function DesignPageContent() {
 
         {/* Lifecycle Status */}
         <div>
-          <label className="block text-[8px] text-gray-400 mb-0.5">LIFECYCLE STATUS</label>
+          <label className="block text-[8px] text-gray-400 mb-0.5 uppercase">Lifecycle</label>
           <select value={lifecycleFilter} onChange={(e) => setLifecycleFilter(e.target.value)} className="w-full border border-gray-350 bg-white rounded p-1 text-[9px] outline-none">
             <option value="All">All Lifecycle</option>
             <option value="ACTIVE">Active</option>
@@ -917,7 +913,7 @@ export function DesignPageContent() {
 
         {/* Revision Status */}
         <div>
-          <label className="block text-[8px] text-gray-400 mb-0.5">REVISION STATUS</label>
+          <label className="block text-[8px] text-gray-400 mb-0.5 uppercase">Revision</label>
           <select value={revFilter} onChange={(e) => setRevFilter(e.target.value)} className="w-full border border-gray-350 bg-white rounded p-1 text-[9px] outline-none">
             <option value="All">All Rev</option>
             {uniqueRevs.map((r) => (
@@ -928,7 +924,7 @@ export function DesignPageContent() {
 
         {/* Inventory Indicator Status */}
         <div>
-          <label className="block text-[8px] text-gray-400 mb-0.5">INVENTORY STATUS</label>
+          <label className="block text-[8px] text-gray-400 mb-0.5 uppercase">Stock Status</label>
           <select value={inventoryFilter} onChange={(e) => setInventoryFilter(e.target.value)} className="w-full border border-gray-350 bg-white rounded p-1 text-[9px] outline-none">
             <option value="All">All Stock Status</option>
             <option value="GREEN">Green (Aman)</option>
@@ -939,7 +935,7 @@ export function DesignPageContent() {
 
         {/* Abnormality Status */}
         <div>
-          <label className="block text-[8px] text-gray-400 mb-0.5">ABNORMALITY STATUS</label>
+          <label className="block text-[8px] text-gray-400 mb-0.5 uppercase">Abnormality</label>
           <select value={abnormalityFilter} onChange={(e) => setAbnormalityFilter(e.target.value)} className="w-full border border-gray-350 bg-white rounded p-1 text-[9px] outline-none">
             <option value="All">All Abnormality</option>
             <option value="OPEN">Open (Problematic)</option>
@@ -1006,14 +1002,13 @@ export function DesignPageContent() {
                       }`}>
                       {isRed ? 'Critical' : isYellow ? 'Warning' : 'Aman'}
                     </td>
-                    <td className={`px-2 py-2 text-center font-bold text-[9px] uppercase tracking-wider border-r-2 border-white ${
-                      item.abnormalityStatus === 'RESOLVED' ? 'bg-green-500 text-white' :
+                    <td className={`px-2 py-2 text-center font-bold text-[9px] uppercase tracking-wider border-r-2 border-white ${item.abnormalityStatus === 'RESOLVED' ? 'bg-green-500 text-white' :
                       item.abnormalityStatus === 'IN_PROGRESS' ? 'bg-yellow-400 text-yellow-950' :
-                      'bg-red-500 text-white animate-pulse'
-                    }`}>
+                        'bg-red-500 text-white animate-pulse'
+                      }`}>
                       {item.abnormalityStatus === 'RESOLVED' ? 'Aman' :
-                       item.abnormalityStatus === 'IN_PROGRESS' ? 'Monitoring' :
-                       'Anomali'}
+                        item.abnormalityStatus === 'IN_PROGRESS' ? 'Monitoring' :
+                          'Anomali'}
                     </td>
                     {isPic && (
                       <td className="px-2 py-2 text-center" onClick={(e) => e.stopPropagation()}>
@@ -1777,11 +1772,10 @@ export function DesignPageContent() {
                                       setIsGlobalRevisionDropdownOpen(false);
                                       setGlobalRevisionItemSearch('');
                                     }}
-                                    className={`px-3 py-2 cursor-pointer transition-colors flex flex-col gap-0.5 ${
-                                      isSelected
-                                        ? 'bg-blue-50 text-blue-700 font-bold'
-                                        : 'text-gray-700 hover:bg-gray-50'
-                                    }`}
+                                    className={`px-3 py-2 cursor-pointer transition-colors flex flex-col gap-0.5 ${isSelected
+                                      ? 'bg-blue-50 text-blue-700 font-bold'
+                                      : 'text-gray-700 hover:bg-gray-50'
+                                      }`}
                                   >
                                     <div className="flex justify-between items-center">
                                       <span className="font-semibold text-gray-800">{item.noReg}</span>
